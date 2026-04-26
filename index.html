@@ -1028,11 +1028,8 @@ async function submitSignup() {
 
   // Redirect after short delay
   setTimeout(() => {
-    // In the full app, this would navigate to /dashboard
-    // For standalone page, we just show the success state
-    showToast(`Welcome to NEXUS v2, ${email.split('@')[0]}! 🎉`);
-    // Uncomment to redirect: nexus-dashboard.html = '/dashboard';
-  }, 1200);
+    window.location.href = 'nexus-dashboard.html';
+}, 1200);
 }
 
 /* ─── SIGNIN SUBMIT ──────────────────────── */
@@ -1067,9 +1064,8 @@ function submitSignin() {
   setTimeout(() => {
     btn.classList.remove('loading');
     document.getElementById('si-success').style.display = 'block';
-    showToast(`Welcome back, ${email.split('@')[0]}! 👋`);
-    // Uncomment to redirect: nexus-dashboard.html = '/dashboard';
-  }, 1000);
+    window.location.href = 'nexus-dashboard.html';
+}, 1200);
 }
 
 /* ─── DEVICE ID ──────────────────────────── */
