@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS v2 — Dashboard</title>
+
+<!-- GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7PMXBZF9PL"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-7PMXBZF9PL');</script>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ─── TOKENS ─────────────────────────────── */
+:root {
+  --black:    #000000;
+  --off:      #0A0A0A;
+  --s1:       #0F0F0F;
+  --s2:       #141414;
+  --s3:       #1A1A1A;
+  --s4:       #202020;
+  --line:     rgba(255,255,255,0.06);
+  --line-g:   rgba(0,255,136,0.18);
+  --line-a:   rgba(245,166,35,0.2);
+  --g1:       #00FF88;
+  --g2:       #00CC6A;
+  --amber:    #F5A623;
+  --red:      #FF4455;
+  --blue:     #4F8EF7;
+  --purple:   #9B6DFF;
+  --white:    #F0F0F0;
+  --muted:    #707070;
+  --dim:      #404040;
+  --font-d:   'Bebas Neue', sans-serif;
+  --font-b:   'DM Sans', sans-serif;
+  --font-m:   'JetBrains Mono', monospace;
+  --r:        10px;
+  --r-sm:     7px;
+  --tr:       all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ─── RESET ──────────────────────────────── */
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { height:100%; }
+body {
+  font-family: var(--font-b);
+  background: var(--off);
+  color: var(--white);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection { background: rgba(0,255,136,0.18); color: var(--g1); }
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font-b); cursor: pointer; border: none; background: none; outline: none; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--s1); }
+::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+
+/* ─── HEADER ─────────────────────────────── */
+#header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 900;
+  height: 56px;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  justify-content: space-between;
+  gap: 12px;
+}
+#header::after {
+  content:'';
+  position:absolute;
+  bottom:0; left:0; right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,0.15) 30%,rgba(0,255,136,0.15) 70%,transparent);
+}
+
+.hdr-left { display:flex; align-items:center; gap:12px; }
+.hdr-right { display:flex; align-items:center; gap:10px; }
+
+/* Menu toggle */
+.menu-btn {
+  width:36px; height:36px;
+  border-radius:var(--r-sm);
+  border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--muted);
+  transition:var(--tr);
+  flex-shrink:0;
+}
+.menu-btn:hover { border-color:var(--line-g); color:var(--g1); }
+.menu-btn svg { width:16px; height:16px; }
+
+/* Logo */
+.logo {
+  display:flex; align-items:center; gap:10px;
+  cursor:pointer; user-select:none;
+}
+.logo-hex {
+  width:30px; height:30px;
+  border:1.5px solid var(--g1);
+  border-radius:7px;
+  transform:rotate(45deg);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 16px rgba(0,255,136,0.2);
+  animation:hexPulse 3s ease-in-out infinite;
+  flex-shrink:0;
+}
+.logo-hex span { transform:rotate(-45deg); font-family:var(--font-d); font-size:0.875rem; color:var(--g1); display:block; }
+@keyframes hexPulse {
+  0%,100%{box-shadow:0 0 12px rgba(0,255,136,0.15);}
+  50%{box-shadow:0 0 28px rgba(0,255,136,0.4);}
+}
+.logo-name { font-family:var(--font-d); font-size:1.125rem; letter-spacing:0.18em; color:var(--white); }
+.logo-name em { color:var(--g1); font-style:normal; }
+
+/* Live badge */
+.live-badge {
+  display:flex; align-items:center; gap:5px;
+  font-family:var(--font-m); font-size:0.5625rem;
+  letter-spacing:0.12em; color:var(--red);
+  background:rgba(255,68,85,0.08);
+  border:1px solid rgba(255,68,85,0.2);
+  padding:3px 9px; border-radius:100px;
+}
+.live-dot {
+  width:5px; height:5px;
+  border-radius:50%;
+  background:var(--red);
+  box-shadow:0 0 6px var(--red);
+  animation:blink 1.5s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* Header right items */
+.online-pill {
+  display:flex; align-items:center; gap:5px;
+  font-family:var(--font-m); font-size:0.5625rem;
+  letter-spacing:0.1em; color:var(--g1);
+}
+.online-dot {
+  width:5px; height:5px; border-radius:50%;
+  background:var(--g1); box-shadow:0 0 6px var(--g1);
+  animation:blink 2s ease-in-out infinite;
+}
+.hdr-btn {
+  padding:7px 14px;
+  border-radius:var(--r-sm);
+  font-family:var(--font-m);
+  font-size:0.5625rem;
+  letter-spacing:0.12em;
+  font-weight:700;
+  text-transform:uppercase;
+  transition:var(--tr);
+}
+.hdr-btn-free {
+  border:1px solid var(--line);
+  color:var(--muted);
+}
+.hdr-btn-free:hover { border-color:var(--line-g); color:var(--g1); }
+.hdr-btn-pro {
+  background:linear-gradient(135deg,var(--amber),#d48800);
+  color:#000;
+  box-shadow:0 0 16px rgba(245,166,35,0.25);
+  animation:proPulse 2.5s ease-in-out infinite;
+}
+@keyframes proPulse{0%,100%{box-shadow:0 0 10px rgba(245,166,35,0.2);}50%{box-shadow:0 0 24px rgba(245,166,35,0.5);}}
+.theme-btn {
+  width:36px; height:36px;
+  border-radius:var(--r-sm);
+  border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem;
+  transition:var(--tr);
+  color:var(--muted);
+}
+.theme-btn:hover { border-color:var(--line-g); }
+
+/* ─── LAYOUT ─────────────────────────────── */
+.app-wrap {
+  display:flex;
+  padding-top:56px;
+  min-height:100vh;
+}
+
+/* ─── SIDEBAR ────────────────────────────── */
+#sidebar {
+  width:224px;
+  flex-shrink:0;
+  background:var(--s1);
+  border-right:1px solid var(--line);
+  position:fixed;
+  top:56px; left:0; bottom:0;
+  overflow-y:auto; overflow-x:hidden;
+  display:flex; flex-direction:column;
+  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1), width 0.3s cubic-bezier(0.4,0,0.2,1);
+  z-index:800;
+}
+#sidebar.collapsed { width:56px; }
+#sidebar.collapsed .nav-label,
+#sidebar.collapsed .nav-text,
+#sidebar.collapsed .nav-badge,
+#sidebar.collapsed .sb-pro { display:none; }
+#sidebar.collapsed .nav-item { justify-content:center; padding:11px; }
+
+/* Mobile: slide off screen */
+@media(max-width:768px){
+  #sidebar { transform:translateX(-100%); width:224px !important; }
+  #sidebar.mobile-open { transform:translateX(0); }
+  #sb-overlay { display:block; }
+  .main-content { margin-left:0 !important; }
+}
+#sb-overlay {
+  display:none;
+  position:fixed; inset:0;
+  z-index:799;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(4px);
+}
+
+.sb-section { padding:16px 10px 6px; }
+.nav-label {
+  font-family:var(--font-m);
+  font-size:0.5rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:var(--dim);
+  padding:0 6px;
+  margin-bottom:5px;
+  white-space:nowrap;
+}
+.nav-item {
+  display:flex; align-items:center; gap:10px;
+  width:100%; padding:9px 10px;
+  border-radius:var(--r-sm);
+  font-size:0.875rem;
+  font-weight:500;
+  color:var(--muted);
+  cursor:pointer;
+  transition:var(--tr);
+  white-space:nowrap;
+  border:none; background:none;
+  text-align:left;
+  position:relative;
+}
+.nav-item:hover { background:var(--s3); color:var(--white); }
+.nav-item.active { background:rgba(0,255,136,0.07); color:var(--g1); }
+.nav-item.active::before {
+  content:'';
+  position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:2px; height:18px;
+  background:var(--g1);
+  border-radius:0 2px 2px 0;
+}
+.nav-icon { font-size:1rem; width:18px; text-align:center; flex-shrink:0; }
+.nav-text { flex:1; }
+.nav-badge {
+  font-family:var(--font-m);
+  font-size:0.5rem;
+  letter-spacing:0.08em;
+  padding:2px 6px;
+  border-radius:4px;
+  background:rgba(245,166,35,0.1);
+  border:1px solid rgba(245,166,35,0.2);
+  color:var(--amber);
+}
+
+/* Sidebar PRO banner */
+.sb-pro {
+  margin:auto 10px 14px;
+  background:linear-gradient(135deg,rgba(245,166,35,0.08),rgba(245,166,35,0.03));
+  border:1px solid var(--line-a);
+  border-radius:var(--r);
+  padding:14px;
+  cursor:pointer;
+  transition:var(--tr);
+}
+.sb-pro:hover { border-color:rgba(245,166,35,0.35); }
+.sb-pro-title { font-weight:600; font-size:0.875rem; color:var(--amber); margin-bottom:4px; }
+.sb-pro-sub { font-size:0.75rem; color:var(--muted); line-height:1.5; margin-bottom:10px; }
+.sb-pro-btn {
+  width:100%; padding:8px;
+  background:linear-gradient(135deg,var(--amber),#d48800);
+  color:#000; font-weight:700;
+  font-size:0.8125rem;
+  border-radius:var(--r-sm);
+  text-align:center;
+  transition:var(--tr);
+}
+.sb-pro-btn:hover { box-shadow:0 4px 16px rgba(245,166,35,0.35); }
+
+/* ─── MAIN CONTENT ───────────────────────── */
+.main-content {
+  flex:1;
+  margin-left:224px;
+  min-width:0;
+  padding:28px 28px 60px;
+  transition:margin-left 0.3s cubic-bezier(0.4,0,0.2,1);
+  max-width:1200px;
+}
+.main-content.collapsed { margin-left:56px; }
+@media(max-width:768px){ .main-content { margin-left:0 !important; padding:16px 16px 100px; } }
+
+/* ─── COUNTDOWN BANNER ───────────────────── */
+#cd-banner {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; flex-wrap:wrap;
+  background:linear-gradient(90deg,rgba(245,166,35,0.08),rgba(245,166,35,0.03));
+  border:1px solid var(--line-a);
+  border-radius:var(--r);
+  padding:12px 18px;
+  margin-bottom:22px;
+  animation:fadeDown 0.5s ease 0.1s both;
+}
+.cd-left { display:flex; align-items:center; gap:10px; }
+.cd-fire { font-size:1.25rem; animation:fireShake 0.8s ease-in-out infinite alternate; }
+@keyframes fireShake{from{transform:rotate(-5deg) scale(1);}to{transform:rotate(5deg) scale(1.1);}}
+.cd-text { font-size:0.9375rem; font-weight:500; color:var(--amber); }
+.cd-sub { font-size:0.75rem; color:var(--muted); margin-top:1px; }
+.cd-right { display:flex; align-items:center; gap:12px; }
+.cd-timer {
+  font-family:var(--font-m);
+  font-size:1.25rem;
+  font-weight:700;
+  color:var(--amber);
+  letter-spacing:0.05em;
+  background:rgba(245,166,35,0.08);
+  border:1px solid rgba(245,166,35,0.15);
+  padding:6px 14px;
+  border-radius:var(--r-sm);
+  min-width:90px;
+  text-align:center;
+}
+
+/* ─── NG BADGE ───────────────────────────── */
+.ng-badge {
+  display:inline-flex; align-items:center; gap:7px;
+  background:rgba(0,255,136,0.06);
+  border:1px solid var(--line-g);
+  border-radius:100px;
+  padding:5px 14px;
+  font-size:0.8125rem;
+  font-weight:500;
+  color:var(--g1);
+  margin-bottom:14px;
+  animation:fadeDown 0.4s ease both;
+}
+
+/* ─── WELCOME SECTION ────────────────────── */
+.welcome-row {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:16px; flex-wrap:wrap;
+  margin-bottom:24px;
+  animation:fadeDown 0.5s ease 0.15s both;
+}
+.welcome-title {
+  font-family:var(--font-d);
+  font-size:clamp(1.6rem,3vw,2.25rem);
+  letter-spacing:0.03em;
+  line-height:1.05;
+  color:var(--white);
+}
+.welcome-title .name { color:var(--g1); }
+.welcome-sub { font-size:0.9375rem; color:var(--muted); margin-top:6px; line-height:1.6; }
+.welcome-meta {
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  margin-top:10px;
+}
+.meta-chip {
+  display:flex; align-items:center; gap:5px;
+  font-family:var(--font-m);
+  font-size:0.5625rem; letter-spacing:0.12em;
+  color:var(--dim); text-transform:uppercase;
+}
+
+/* ─── PRO UPSELL STRIP ───────────────────── */
+.pro-strip {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px; flex-wrap:wrap;
+  background:linear-gradient(90deg,rgba(245,166,35,0.06),rgba(245,166,35,0.02));
+  border:1px solid var(--line-a);
+  border-radius:var(--r);
+  padding:14px 20px;
+  margin-bottom:28px;
+  cursor:pointer;
+  transition:var(--tr);
+  animation:fadeDown 0.5s ease 0.2s both;
+}
+.pro-strip:hover { border-color:rgba(245,166,35,0.35); }
+.pro-strip-left { display:flex; align-items:center; gap:12px; }
+.pro-strip-icon {
+  width:38px; height:38px;
+  border-radius:9px;
+  background:rgba(245,166,35,0.1);
+  border:1px solid rgba(245,166,35,0.2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.125rem; flex-shrink:0;
+}
+.pro-strip-title { font-weight:600; font-size:0.9375rem; color:var(--amber); margin-bottom:2px; }
+.pro-strip-sub { font-size:0.8125rem; color:var(--muted); }
+
+/* ─── SECTION HEADER ─────────────────────── */
+.section-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:16px;
+}
+.section-title {
+  font-family:var(--font-m);
+  font-size:0.5625rem; letter-spacing:0.18em;
+  text-transform:uppercase; color:var(--dim);
+  display:flex; align-items:center; gap:10px;
+}
+.section-title::after { content:''; display:block; width:40px; height:1px; background:var(--line); }
+.section-count { font-family:var(--font-m); font-size:0.5625rem; color:var(--dim); letter-spacing:0.1em; }
+
+/* ─── TOOL GRID ──────────────────────────── */
+.tool-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:14px;
+  margin-bottom:32px;
+  animation:fadeUp 0.5s ease 0.25s both;
+}
+@media(max-width:560px){ .tool-grid { grid-template-columns:1fr; } }
+
+/* Tool card */
+.tool-card {
+  background:var(--s2);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  padding:20px;
+  cursor:pointer;
+  transition:var(--tr);
+  position:relative;
+  overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.tool-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,0.12),transparent);
+  transition:var(--tr);
+}
+.tool-card:hover {
+  border-color:rgba(0,255,136,0.2);
+  transform:translateY(-3px);
+  box-shadow:0 12px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,255,136,0.05);
+}
+.tool-card:hover::before {
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,0.3),transparent);
+}
+/* Card number */
+.card-num {
+  position:absolute; top:14px; right:16px;
+  font-family:var(--font-m);
+  font-size:0.5rem; color:var(--dim);
+  letter-spacing:0.1em;
+}
+/* Icon */
+.card-icon {
+  width:42px; height:42px;
+  border-radius:10px;
+  background:rgba(0,255,136,0.06);
+  border:1px solid rgba(0,255,136,0.1);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.25rem;
+  margin-bottom:14px;
+  transition:var(--tr);
+}
+.tool-card:hover .card-icon {
+  background:rgba(0,255,136,0.1);
+  border-color:rgba(0,255,136,0.2);
+  box-shadow:0 0 16px rgba(0,255,136,0.1);
+}
+/* PRO card overrides */
+.tool-card.pro-card { border-color:rgba(245,166,35,0.1); }
+.tool-card.pro-card::before { background:linear-gradient(90deg,transparent,rgba(245,166,35,0.15),transparent); }
+.tool-card.pro-card:hover { border-color:rgba(245,166,35,0.3); box-shadow:0 12px 40px rgba(0,0,0,0.25), 0 0 24px rgba(245,166,35,0.06); }
+.tool-card.pro-card .card-icon { background:rgba(245,166,35,0.06); border-color:rgba(245,166,35,0.12); }
+.tool-card.pro-card:hover .card-icon { background:rgba(245,166,35,0.1); border-color:rgba(245,166,35,0.22); }
+
+/* PRO gradient border glow */
+.tool-card.pro-card::after {
+  content:'';
+  position:absolute; inset:-1px;
+  border-radius:calc(var(--r) + 1px);
+  background:linear-gradient(135deg,rgba(245,166,35,0.15),transparent 60%);
+  z-index:-1;
+  opacity:0;
+  transition:var(--tr);
+}
+.tool-card.pro-card:hover::after { opacity:1; }
+
+.card-name {
+  font-family:var(--font-d);
+  font-size:1.1875rem;
+  letter-spacing:0.04em;
+  color:var(--white);
+  margin-bottom:6px;
+  line-height:1.1;
+}
+.card-desc {
+  font-size:0.8125rem;
+  color:var(--muted);
+  line-height:1.6;
+  flex:1;
+  margin-bottom:16px;
+}
+.card-footer {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:auto;
+}
+.card-launch {
+  display:flex; align-items:center; gap:5px;
+  font-size:0.875rem; font-weight:600;
+  color:var(--g1);
+  transition:var(--tr);
+}
+.tool-card:hover .card-launch { gap:8px; }
+.pro-card .card-launch { color:var(--amber); }
+.card-badge {
+  font-family:var(--font-m);
+  font-size:0.5rem; letter-spacing:0.1em;
+  padding:3px 8px; border-radius:4px;
+}
+.badge-free { background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.15); color:var(--g1); }
+.badge-pro { background:rgba(245,166,35,0.08); border:1px solid rgba(245,166,35,0.2); color:var(--amber); }
+
+/* Card usage bar */
+.card-bar {
+  height:2px;
+  background:var(--s4);
+  border-radius:2px;
+  margin-top:10px;
+  overflow:hidden;
+  position:absolute;
+  bottom:0; left:0; right:0;
+}
+.card-bar-fill {
+  height:100%;
+  border-radius:2px;
+  background:linear-gradient(90deg,var(--g1),var(--g2));
+  transition:width 1s ease;
+}
+.pro-card .card-bar-fill { background:linear-gradient(90deg,var(--amber),#d48800); }
+
+/* ─── QUICK STATS ROW ────────────────────── */
+.stats-row {
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:28px;
+  animation:fadeUp 0.5s ease 0.3s both;
+}
+@media(max-width:640px){ .stats-row { grid-template-columns:repeat(2,1fr); } }
+.stat-box {
+  background:var(--s2);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  padding:16px;
+  transition:var(--tr);
+}
+.stat-box:hover { border-color:rgba(255,255,255,0.1); transform:translateY(-2px); }
+.stat-label {
+  font-family:var(--font-m);
+  font-size:0.5rem; letter-spacing:0.15em;
+  text-transform:uppercase; color:var(--dim);
+  margin-bottom:8px;
+}
+.stat-value {
+  font-family:var(--font-d);
+  font-size:2rem; line-height:1;
+  color:var(--white); margin-bottom:4px;
+}
+.stat-sub { font-size:0.75rem; color:var(--dim); }
+.stat-trend {
+  font-family:var(--font-m);
+  font-size:0.5625rem; color:var(--g1);
+  display:flex; align-items:center; gap:3px;
+  margin-top:4px;
+}
+
+/* ─── ACTIVITY FEED ──────────────────────── */
+.activity-section {
+  display:grid; grid-template-columns:1fr 340px; gap:16px;
+  margin-bottom:28px;
+  animation:fadeUp 0.5s ease 0.35s both;
+}
+@media(max-width:900px){ .activity-section { grid-template-columns:1fr; } }
+
+.recent-card, .tips-card {
+  background:var(--s2);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  overflow:hidden;
+}
+.card-head {
+  padding:14px 18px;
+  border-bottom:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.card-head-title {
+  font-family:var(--font-m);
+  font-size:0.5625rem; letter-spacing:0.15em;
+  text-transform:uppercase; color:var(--muted);
+}
+.card-head-action {
+  font-size:0.75rem; color:var(--g1);
+  cursor:pointer; transition:var(--tr);
+}
+.card-head-action:hover { opacity:0.7; }
+
+/* Activity items */
+.activity-item {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 18px;
+  border-bottom:1px solid var(--line);
+  transition:var(--tr);
+  cursor:pointer;
+}
+.activity-item:last-child { border-bottom:none; }
+.activity-item:hover { background:var(--s3); }
+.act-icon {
+  width:34px; height:34px;
+  border-radius:8px;
+  background:var(--s3);
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.875rem; flex-shrink:0;
+}
+.act-body { flex:1; min-width:0; }
+.act-title { font-size:0.875rem; font-weight:500; color:var(--white); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.act-sub { font-size:0.75rem; color:var(--muted); margin-top:2px; }
+.act-score {
+  font-family:var(--font-m);
+  font-size:0.875rem; font-weight:700;
+  color:var(--g1); flex-shrink:0;
+}
+
+/* Tips card */
+.tip-item {
+  padding:14px 18px;
+  border-bottom:1px solid var(--line);
+}
+.tip-item:last-child { border-bottom:none; }
+.tip-num {
+  font-family:var(--font-m); font-size:0.5rem;
+  color:var(--g1); letter-spacing:0.15em;
+  margin-bottom:5px;
+}
+.tip-text { font-size:0.8125rem; color:var(--muted); line-height:1.6; }
+.tip-text strong { color:var(--white); }
+
+/* ─── BOTTOM NAV (mobile) ────────────────── */
+#bottom-nav {
+  display:none;
+  position:fixed;
+  bottom:0; left:0; right:0;
+  z-index:850;
+  background:rgba(10,10,10,0.96);
+  border-top:1px solid var(--line);
+  backdrop-filter:blur(20px);
+  padding:6px 0 env(safe-area-inset-bottom,8px);
+}
+@media(max-width:768px){ #bottom-nav { display:flex; } }
+.bn-inner { display:flex; width:100%; justify-content:space-around; }
+.bn-item {
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:6px 4px;
+  font-family:var(--font-m);
+  font-size:0.5rem; letter-spacing:0.08em; text-transform:uppercase;
+  color:var(--dim); cursor:pointer; transition:0.2s;
+  border:none; background:none;
+}
+.bn-item.active { color:var(--g1); }
+.bn-icon { font-size:1.25rem; }
+
+/* ─── TOAST ──────────────────────────────── */
+#toast {
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--s2);
+  border:1px solid var(--line-g);
+  color:var(--white);
+  font-size:0.875rem;
+  padding:12px 22px;
+  border-radius:var(--r-sm);
+  z-index:9999;
+  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);
+  white-space:nowrap;
+  pointer-events:none;
+}
+#toast.show { transform:translateX(-50%) translateY(0); }
+
+/* ─── CMD PALETTE ────────────────────────── */
+#cmd-overlay {
+  position:fixed; inset:0; z-index:9000;
+  background:rgba(0,0,0,0.75);
+  backdrop-filter:blur(10px);
+  display:none; align-items:flex-start; justify-content:center;
+  padding-top:12vh;
+}
+#cmd-overlay.open { display:flex; }
+#cmd-box {
+  background:var(--s2);
+  border:1px solid var(--line-g);
+  border-radius:var(--r);
+  width:100%; max-width:540px;
+  overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,0.6);
+  animation:fadeDown 0.2s ease;
+}
+#cmd-input {
+  width:100%; background:transparent; border:none;
+  color:var(--white); font-family:var(--font-b);
+  font-size:1rem; padding:18px 20px;
+  border-bottom:1px solid var(--line);
+  outline:none;
+}
+#cmd-input::placeholder { color:var(--dim); }
+.cmd-item {
+  display:flex; align-items:center; gap:12px;
+  padding:11px 20px; cursor:pointer; transition:0.15s;
+}
+.cmd-item:hover, .cmd-item.hi { background:rgba(0,255,136,0.06); }
+.cmd-item.hi .cmd-name { color:var(--g1); }
+.cmd-ico {
+  width:30px; height:30px; border-radius:7px;
+  background:var(--s3); display:flex;
+  align-items:center; justify-content:center; font-size:0.875rem;
+}
+.cmd-name { font-size:0.9375rem; font-weight:500; color:var(--white); }
+.cmd-sub { font-size:0.75rem; color:var(--muted); margin-top:1px; }
+.cmd-hint {
+  padding:9px 20px; border-top:1px solid var(--line);
+  font-family:var(--font-m); font-size:0.5625rem;
+  color:var(--dim); letter-spacing:0.1em;
+}
+
+/* ─── ANIMATIONS ─────────────────────────── */
+@keyframes fadeDown { from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);} }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);} }
+</style>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- CMD Overlay -->
+<div id="cmd-overlay" onclick="if(event.target===this)closeCmd()">
+  <div id="cmd-box">
+    <input id="cmd-input" type="text" placeholder="Search tools… ⌘K" oninput="filterCmd(this.value)" onkeydown="cmdNav(event)" autocomplete="off">
+    <div id="cmd-list"></div>
+    <div class="cmd-hint">↑↓ navigate &nbsp;·&nbsp; Enter to open &nbsp;·&nbsp; Esc to close</div>
+  </div>
+</div>
+
+<!-- Sidebar overlay (mobile) -->
+<div id="sb-overlay" onclick="closeSidebar()"></div>
+
+<!-- ════ HEADER ════ -->
+<header id="header">
+  <div class="hdr-left">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <div class="logo" onclick="location.reload()">
+      <div class="logo-hex"><span>N</span></div>
+      <div>
+        <div class="logo-name">NEXUS <em>v2</em></div>
+      </div>
+    </div>
+    <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+  </div>
+  <div class="hdr-right">
+    <div class="online-pill">
+      <span class="online-dot"></span>
+      <span id="online-count">247</span>&nbsp;online
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" id="theme-btn">🌙</button>
+    <button class="hdr-btn hdr-btn-free" id="tier-btn" onclick="goTo('pro')">✦ Free</button>
+    <button class="hdr-btn" style="background:rgba(0,255,136,0.07);border:1px solid var(--line-g);color:var(--g1);font-family:var(--font-m);font-size:0.5rem;letter-spacing:0.1em;" onclick="openCmd()" title="⌘K">⌘K</button>
+  </div>
+</header>
+
+<!-- ════ APP WRAP ════ -->
+<div class="app-wrap">
+
+  <!-- ════ SIDEBAR ════ -->
+  <nav id="sidebar">
+    <div class="sb-section">
+      <div class="nav-label">Main</div>
+      <button class="nav-item active" id="nav-dashboard" onclick="goTo('dashboard')">
+        <span class="nav-icon">⊞</span><span class="nav-text">Dashboard</span>
+      </button>
+    </div>
+
+    <div class="sb-section">
+      <div class="nav-label">Free Tools</div>
+      <button class="nav-item" id="nav-viral" onclick="goTo('viral-velocity')">
+        <span class="nav-icon">⚡</span><span class="nav-text">Viral Velocity</span>
+      </button>
+      <button class="nav-item" id="nav-dna" onclick="goTo('title-dna')">
+        <span class="nav-icon">🧬</span><span class="nav-text">Title DNA</span>
+      </button>
+      <button class="nav-item" id="nav-niche" onclick="goTo('niche-map')">
+        <span class="nav-icon">🗺</span><span class="nav-text">Niche Map</span>
+      </button>
+      <button class="nav-item" id="nav-seo" onclick="goTo('seo-matrix')">
+        <span class="nav-icon">📊</span><span class="nav-text">SEO Matrix</span>
+      </button>
+      <button class="nav-item" id="nav-live" onclick="goTo('live-feed')">
+        <span class="nav-icon">📡</span><span class="nav-text">Live Feed</span>
+      </button>
+    </div>
+
+    <div class="sb-section">
+      <div class="nav-label">PRO Tools</div>
+      <button class="nav-item" id="nav-momentum" onclick="goTo('pro-momentum')">
+        <span class="nav-icon">📈</span><span class="nav-text">Trend Momentum</span>
+        <span class="nav-badge">PRO</span>
+      </button>
+      <button class="nav-item" id="nav-gap" onclick="goTo('pro-gap')">
+        <span class="nav-icon">🔍</span><span class="nav-text">Gap Finder</span>
+        <span class="nav-badge">PRO</span>
+      </button>
+      <button class="nav-item" id="nav-weak" onclick="goTo('pro-weak')">
+        <span class="nav-icon">⚔</span><span class="nav-text">Weakness Report</span>
+        <span class="nav-badge">PRO</span>
+      </button>
+      <button class="nav-item" id="nav-fm" onclick="goTo('pro-firstmover')">
+        <span class="nav-icon">★</span><span class="nav-text">First Mover</span>
+        <span class="nav-badge">PRO</span>
+      </button>
+    </div>
+
+    <div class="sb-section">
+      <div class="nav-label">Account</div>
+      <button class="nav-item" onclick="goTo('pro')">
+        <span class="nav-icon">✦</span><span class="nav-text">Upgrade to PRO</span>
+      </button>
+      <button class="nav-item" onclick="showSettings()">
+        <span class="nav-icon">⚙</span><span class="nav-text">Settings</span>
+      </button>
+      <button class="nav-item" onclick="window.open('https://wa.me/2349076223484','_blank')">
+        <span class="nav-icon">💬</span><span class="nav-text">Support</span>
+      </button>
+    </div>
+
+    <div class="sb-pro" onclick="goTo('pro')">
+      <div class="sb-pro-title">✦ Unlock PRO</div>
+      <div class="sb-pro-sub">Trend Momentum, Gap Finder, Weakness Report + First Mover Alert</div>
+      <div class="sb-pro-btn">Activate Now →</div>
+    </div>
+  </nav>
+
+  <!-- ════ MAIN CONTENT ════ -->
+  <main class="main-content" id="main">
+
+    <!-- Countdown Banner -->
+    <div id="cd-banner">
+      <div class="cd-left">
+        <div class="cd-fire">🔥</div>
+        <div>
+          <div class="cd-text">PRO is ₦1,600 today only — limited flash offer</div>
+          <div class="cd-sub">Includes all 4 PRO tools + priority WhatsApp support</div>
+        </div>
+      </div>
+      <div class="cd-right">
+        <div class="cd-timer" id="cd-timer">10:00:00</div>
+        <button class="hdr-btn hdr-btn-pro" onclick="goTo('pro')" style="padding:9px 18px;font-size:0.625rem;">Activate Now →</button>
+      </div>
+    </div>
+
+    <!-- NG Badge (shown if Nigeria) -->
+    <div id="ng-wrap"></div>
+
+    <!-- Welcome row -->
+    <div class="welcome-row">
+      <div>
+        <div class="welcome-title">
+          Welcome back,<br><span class="name" id="user-name">Creator</span> 👋
+        </div>
+        <div class="welcome-sub">Your YouTube intelligence dashboard is ready. Start with Viral Velocity for fastest results.</div>
+        <div class="welcome-meta">
+          <div class="meta-chip">
+            <span style="color:var(--g1);">●</span>&nbsp;
+            <span id="meta-email">Loading...</span>
+          </div>
+          <div class="meta-chip">
+            <span>📅</span>&nbsp;Joined <span id="meta-date">today</span>
+          </div>
+          <div class="meta-chip">
+            <span style="color:var(--g1);">✦</span>&nbsp;
+            <span id="meta-plan">Free Plan</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-label">Tools Available</div>
+        <div class="stat-value">5</div>
+        <div class="stat-sub">Free forever</div>
+        <div class="stat-trend">▲ +4 with PRO</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Categories</div>
+        <div class="stat-value" style="color:var(--blue)">18</div>
+        <div class="stat-sub">Across all tools</div>
+        <div class="stat-trend" style="color:var(--blue)">9 countries</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Creators Online</div>
+        <div class="stat-value" style="color:var(--g1)" id="stat-online">247</div>
+        <div class="stat-sub">Using NEXUS right now</div>
+        <div class="stat-trend">Live counter</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Data Points</div>
+        <div class="stat-value" style="color:var(--amber)">∞</div>
+        <div class="stat-sub">Real-time YouTube API</div>
+        <div class="stat-trend" style="color:var(--amber)">Zero delay</div>
+      </div>
+    </div>
+
+    <!-- PRO Upsell strip -->
+    <div class="pro-strip" onclick="goTo('pro')">
+      <div class="pro-strip-left">
+        <div class="pro-strip-icon">✦</div>
+        <div>
+          <div class="pro-strip-title">Unlock PRO: Trend Momentum + Content Gap Finder + Weakness Report + First Mover Alert</div>
+          <div class="pro-strip-sub">4 advanced intelligence tools your competitors don't have access to · ₦3,000/month ≈ $2 USD</div>
+        </div>
+      </div>
+      <button class="hdr-btn hdr-btn-pro" style="padding:10px 20px;font-size:0.5625rem;flex-shrink:0;">Activate PRO →</button>
+    </div>
+
+    <!-- Free Tools -->
+    <div class="section-hdr">
+      <div class="section-title">Free Tools</div>
+      <div class="section-count">5 tools</div>
+    </div>
+    <div class="tool-grid">
+      <div class="tool-card" onclick="goTo('viral-velocity')">
+        <div class="card-num">01</div>
+        <div class="card-icon">⚡</div>
+        <div class="card-name">VIRAL VELOCITY SCANNER</div>
+        <div class="card-desc">Score any keyword 0–100 for viral potential. See which videos are exploding right now and why they rank.</div>
+        <div class="card-footer">
+          <div class="card-launch">Launch <span>→</span></div>
+          <div class="card-badge badge-free">FREE</div>
+        </div>
+        <div class="card-bar"><div class="card-bar-fill" style="width:92%"></div></div>
+      </div>
+
+      <div class="tool-card" onclick="goTo('title-dna')">
+        <div class="card-num">02</div>
+        <div class="card-icon">🧬</div>
+        <div class="card-name">TITLE DNA SCANNER</div>
+        <div class="card-desc">Reverse-engineer why top videos rank. Extract power words, patterns, and auto-generate winning titles.</div>
+        <div class="card-footer">
+          <div class="card-launch">Launch <span>→</span></div>
+          <div class="card-badge badge-free">FREE</div>
+        </div>
+        <div class="card-bar"><div class="card-bar-fill" style="width:85%"></div></div>
+      </div>
+
+      <div class="tool-card" onclick="goTo('niche-map')">
+        <div class="card-num">03</div>
+        <div class="card-icon">🗺</div>
+        <div class="card-name">NICHE SATURATION MAP</div>
+        <div class="card-desc">Find out how crowded any niche is before you film. Get sub-niche opportunities with a single click.</div>
+        <div class="card-footer">
+          <div class="card-launch">Launch <span>→</span></div>
+          <div class="card-badge badge-free">FREE</div>
+        </div>
+        <div class="card-bar"><div class="card-bar-fill" style="width:78%"></div></div>
+      </div>
+
+      <div class="tool-card" onclick="goTo('seo-matrix')">
+        <div class="card-num">04</div>
+        <div class="card-icon">📊</div>
+        <div class="card-name">SEO MATRIX</div>
+        <div class="card-desc">Score your title across 7 SEO dimensions. Get an A–S grade with specific, actionable optimization fixes.</div>
+        <div class="card-footer">
+          <div class="card-launch">Launch <span>→</span></div>
+          <div class="card-badge badge-free">FREE</div>
+        </div>
+        <div class="card-bar"><div class="card-bar-fill" style="width:88%"></div></div>
+      </div>
+
+      <div class="tool-card" onclick="goTo('live-feed')">
+        <div class="card-num">05</div>
+        <div class="card-icon">📡</div>
+        <div class="card-name">LIVE FEED</div>
+        <div class="card-desc">Real-time YouTube trending across 18 categories and 9 countries. Full engagement data. CSV export included.</div>
+        <div class="card-footer">
+          <div class="card-launch">Launch <span>→</span></div>
+          <div class="card-badge badge-free">FREE</div>
+        </div>
+        <div class="card-bar"><div class="card-bar-fill" style="width:95%"></div></div>
+      </div>
+    </div>
+
+    <!-- PRO Tools -->
+    <div class="section-hdr">
+      <div class="section-title">PRO Tools</div>
+      <div class="section-count">4 tools · locked</div>
+    </div>
+    <div class="tool-grid">
+      <div class="tool-card pro-card" onclick="goTo('pro')">
+        <div class="card-num">06</div>
+        <div class="card-icon">📈</div>
+        <div class="card-name">TREND MOMENTUM TRACKER</div>
+        <div class="card-desc">Know if a keyword is RISING or FALLING before you film. Momentum score 0–100 with peak detection.</div>
+        <div class="card-footer">
+          <div class="card-launch" style="color:var(--amber)">Unlock <span>→</span></div>
+          <div class="card-badge badge-pro">PRO</div>
+        </div>
+        <div class="card-bar"><div class="card-bar-fill" style="width:0%"></div></div>
+      </div>
+
+      <div class="tool-card pro-card" onclick="goTo('pro')">
+        <div class="card-num">07</div>
+        <div class="card-icon">🔍</div>
+        <div class="card-name">CONTENT GAP FINDER</div>
+        <div class="card-desc">Find topics competitors haven't covered. Tests 12 keyword variations. Every result is clickable to investigate.</div>
+        <div class="card-footer">
+          <div class="card-launch" style="color:var(--amber)">Unlock <span>→</span></div>
+          <div class="card-badge badge-pro">PRO</div>
+        </div>
+        <div class="card-bar"><div class="card-bar-fill" style="width:0%"></div></div>
+      </div>
+
+      <div class="tool-card pro-card" onclick="goTo('pro')">
+        <div class="card-num">08</div>
+        <div class="card-icon">⚔</div>
+        <div class="card-name">WEAKNESS REPORT</div>
+        <div class="card-desc">Find where big channels are vulnerable. Click attack vectors to generate better versions with must-use words.</div>
+        <div class="card-footer">
+          <div class="card-launch" style="color:var(--amber)">Unlock <span>→</span></div>
+          <div class="card-badge badge-pro">PRO</div>
+        </div>
+        <div class="card-bar"><div class="card-bar-fill" style="width:0%"></div></div>
+      </div>
+
+      <div class="tool-card pro-card" onclick="goTo('pro')">
+        <div class="card-num">09</div>
+        <div class="card-icon">★</div>
+        <div class="card-name">FIRST MOVER ALERT</div>
+        <div class="card-desc">High demand + few videos = you win. Tests 16 universal modifiers across all niches. Time-to-rank predictions.</div>
+        <div class="card-footer">
+          <div class="card-launch" style="color:var(--amber)">Unlock <span>→</span></div>
+          <div class="card-badge badge-pro">PRO</div>
+        </div>
+        <div class="card-bar"><div class="card-bar-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Activity + Tips -->
+    <div class="activity-section">
+      <div class="recent-card">
+        <div class="card-head">
+          <div class="card-head-title">Recent Searches</div>
+          <div class="card-head-action" onclick="clearRecent()">Clear all</div>
+        </div>
+        <div id="recent-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+      <div class="tips-card">
+        <div class="card-head">
+          <div class="card-head-title">Pro Tips</div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">TIP 01</div>
+          <div class="tip-text"><strong>Start with Viral Velocity</strong> — find what's working before building your title strategy.</div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">TIP 02</div>
+          <div class="tip-text"><strong>Use Niche Map first</strong> if you're in a new space — saturation &lt;35% = enter now.</div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">TIP 03</div>
+          <div class="tip-text"><strong>Score your title in SEO Matrix</strong> before publishing — aim for A+ or higher.</div>
+        </div>
+        <div class="tip-item">
+          <div class="tip-num">TIP 04</div>
+          <div class="tip-text"><strong>Nigeria trending?</strong> Use Live Feed with 🇳🇬 filter to catch waves early.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Bottom Nav (mobile) -->
+<nav id="bottom-nav">
+  <div class="bn-inner">
+    <button class="bn-item active" onclick="goTo('dashboard')"><span class="bn-icon">⊞</span>Home</button>
+    <button class="bn-item" onclick="goTo('viral-velocity')"><span class="bn-icon">⚡</span>Velocity</button>
+    <button class="bn-item" onclick="goTo('live-feed')"><span class="bn-icon">📡</span>Live</button>
+    <button class="bn-item" onclick="goTo('seo-matrix')"><span class="bn-icon">📊</span>SEO</button>
+    <button class="bn-item" onclick="goTo('pro')"><span class="bn-icon">✦</span>PRO</button>
+  </div>
+</nav>
+
+<script>
+/* ─── INIT ───────────────────────────────── */
+const WA = '2349076223484';
+let sidebarCollapsed = false;
+
+// Load user data
+const email    = localStorage.getItem('nexus_email') || '';
+const userRaw  = localStorage.getItem('nexus_user');
+const userData = userRaw ? JSON.parse(userRaw) : {};
+const isPro    = checkPro();
+
+function checkPro() {
+  const stored = localStorage.getItem('_nexus_pro');
+  if (!stored) return false;
+  const [key, did, ym] = stored.split('|');
+  const now = new Date();
+  const curYm = now.getFullYear().toString() + String(now.getMonth()+1).padStart(2,'0');
+  return did === getDeviceId() && ym === curYm;
+}
+function getDeviceId() {
+  let d = localStorage.getItem('_nexus_did');
+  if (!d) { d='DEV-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,8).toUpperCase(); localStorage.setItem('_nexus_did',d); }
+  return d;
+}
+
+/* ─── POPULATE USER INFO ─────────────────── */
+(function init() {
+  if (!email) { window.location.href = 'nexus-register.html'; return; }
+  const name = email.split('@')[0];
+  document.getElementById('user-name').textContent = name.charAt(0).toUpperCase() + name.slice(1);
+  document.getElementById('meta-email').textContent = email;
+  const joined = userData.timestamp ? new Date(userData.timestamp).toLocaleDateString('en-NG',{day:'numeric',month:'short',year:'numeric'}) : 'Today';
+  document.getElementById('meta-date').textContent = joined;
+  if (isPro) {
+    document.getElementById('meta-plan').textContent = '★ PRO Active';
+    document.getElementById('meta-plan').style.color = 'var(--amber)';
+    document.getElementById('tier-btn').textContent = '★ PRO';
+    document.getElementById('tier-btn').className = 'hdr-btn hdr-btn-pro';
+  }
+  // GA4
+  try { gtag('set',{user_id:email}); gtag('event','page_view',{page:'dashboard'}); } catch(e){}
+  // Load recent searches
+  renderRecent();
+  // Country
+  detectCountry();
+})();
+
+/* ─── COUNTRY DETECT ─────────────────────── */
+async function detectCountry() {
+  const cached = sessionStorage.getItem('nexus_country');
+  if (cached === 'NG' || (!cached && userData.country === 'NG')) {
+    showNGBadge();
+  }
+  if (!cached) {
+    try {
+      const r = await fetch('https://ipapi.co/json/');
+      const d = await r.json();
+      sessionStorage.setItem('nexus_country', d.country_code || '?');
+      if (d.country_code === 'NG') showNGBadge();
+    } catch(e) {}
+  }
+}
+function showNGBadge() {
+  document.getElementById('ng-wrap').innerHTML =
+    '<div class="ng-badge">🔥 Trending in Nigeria right now — check Live Feed for the latest</div>';
+}
+
+/* ─── COUNTDOWN TIMER ────────────────────── */
+(function startCD() {
+  const end = new Date();
+  end.setHours(23, 59, 59, 0);
+  function tick() {
+    const diff = end - Date.now();
+    if (diff <= 0) { document.getElementById('cd-timer').textContent = 'EXPIRED'; return; }
+    const h = String(Math.floor(diff / 3600000)).padStart(2,'0');
+    const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2,'0');
+    const s = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+    document.getElementById('cd-timer').textContent = `${h}:${m}:${s}`;
+  }
+  tick(); setInterval(tick, 1000);
+})();
+
+/* ─── LIVE USER COUNT ────────────────────── */
+function updateOnline() {
+  const n = Math.floor(180 + Math.random() * 140);
+  document.getElementById('online-count').textContent = n;
+  document.getElementById('stat-online').textContent = n;
+}
+updateOnline(); setInterval(updateOnline, 10000);
+
+/* ─── SIDEBAR ────────────────────────────── */
+function toggleSidebar() {
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+    document.getElementById('sb-overlay').style.display =
+      document.getElementById('sidebar').classList.contains('mobile-open') ? 'block' : 'none';
+  } else {
+    sidebarCollapsed = !sidebarCollapsed;
+    document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+    document.getElementById('main').classList.toggle('collapsed', sidebarCollapsed);
+  }
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sb-overlay').style.display = 'none';
+}
+
+/* ─── NAVIGATION ─────────────────────────── */
+function goTo(page) {
+  // Map page name to file
+  const map = {
+    'dashboard':       'nexus-dashboard.html',
+    'viral-velocity':  'nexus-viral-velocity.html',
+    'title-dna':       'nexus-title-dna.html',
+    'niche-map':       'nexus-niche-map.html',
+    'seo-matrix':      'nexus-seo-matrix.html',
+    'live-feed':       'nexus-live-feed.html',
+    'pro':             'nexus-pro.html',
+    'pro-momentum':    'nexus-pro.html',
+    'pro-gap':         'nexus-pro.html',
+    'pro-weak':        'nexus-pro.html',
+    'pro-firstmover':  'nexus-pro.html',
+    'terms':           'nexus-terms.html',
+    'privacy':         'nexus-privacy.html',
+    'admin':           'nexus-admin.html',
+  };
+  // Log event
+  try {
+    const events = JSON.parse(localStorage.getItem('nexus_events')||'[]');
+    events.push({ gmail:email, event_type:'tool_launch', tool:page, timestamp:new Date().toISOString() });
+    if (events.length > 200) events.splice(0, events.length-200);
+    localStorage.setItem('nexus_events', JSON.stringify(events));
+    gtag('event','tool_launch',{tool:page});
+  } catch(e){}
+  const dest = map[page];
+  if (dest) { window.location.href = dest; }
+  else { showToast('Page coming soon — building now'); }
+}
+
+/* ─── RECENT SEARCHES ────────────────────── */
+function renderRecent() {
+  const tools = ['vel','dna','sat','seo','live'];
+  const items = [];
+  tools.forEach(t => {
+    const searches = JSON.parse(localStorage.getItem('nexus_searches_'+t)||'[]');
+    const icons = {vel:'⚡',dna:'🧬',sat:'🗺',seo:'📊',live:'📡'};
+    const labels = {vel:'Viral Velocity',dna:'Title DNA',sat:'Niche Map',seo:'SEO Matrix',live:'Live Feed'};
+    searches.slice(0,2).forEach(q => items.push({icon:icons[t], tool:labels[t], query:q, key:t}));
+  });
+  const el = document.getElementById('recent-list');
+  if (!items.length) {
+    el.innerHTML = `<div style="padding:28px;text-align:center;color:var(--dim);font-size:0.8125rem;">No searches yet.<br>Start with Viral Velocity ⚡</div>`;
+    return;
+  }
+  el.innerHTML = items.slice(0,6).map(item => `
+    <div class="activity-item" onclick="openRecent('${item.key}','${item.query.replace(/'/g,"\\'")}')">
+      <div class="act-icon">${item.icon}</div>
+      <div class="act-body">
+        <div class="act-title">${item.query}</div>
+        <div class="act-sub">${item.tool}</div>
+      </div>
+      <div class="act-score">→</div>
+    </div>`).join('');
+}
+
+function openRecent(tool, query) {
+  const pages = {vel:'viral-velocity',dna:'title-dna',sat:'niche-map',seo:'seo-matrix',live:'live-feed'};
+  sessionStorage.setItem('nexus_prefill_'+tool, query);
+  goTo(pages[tool]);
+}
+
+function clearRecent() {
+  ['vel','dna','sat','seo','live'].forEach(t => localStorage.removeItem('nexus_searches_'+t));
+  renderRecent();
+  showToast('✓ Search history cleared');
+}
+
+/* ─── COMMAND PALETTE ────────────────────── */
+const CMD = [
+  {ico:'⊞',name:'Dashboard',sub:'Main hub',go:'dashboard'},
+  {ico:'⚡',name:'Viral Velocity',sub:'Score keywords 0–100',go:'viral-velocity'},
+  {ico:'🧬',name:'Title DNA',sub:'Extract power words + generate titles',go:'title-dna'},
+  {ico:'🗺',name:'Niche Map',sub:'Saturation analysis',go:'niche-map'},
+  {ico:'📊',name:'SEO Matrix',sub:'7-dimension title scoring',go:'seo-matrix'},
+  {ico:'📡',name:'Live Feed',sub:'Real-time YouTube trending',go:'live-feed'},
+  {ico:'✦',name:'Upgrade to PRO',sub:'₦3,000/month — 4 extra tools',go:'pro'},
+  {ico:'📈',name:'Trend Momentum',sub:'PRO — Rising or falling?',go:'pro'},
+  {ico:'🔍',name:'Content Gap Finder',sub:'PRO — Find uncovered topics',go:'pro'},
+  {ico:'⚔',name:'Weakness Report',sub:'PRO — Attack vectors',go:'pro'},
+  {ico:'★',name:'First Mover Alert',sub:'PRO — Zero competition opportunities',go:'pro'},
+];
+let cmdFilt = CMD, cmdSel = 0;
+
+function openCmd() {
+  document.getElementById('cmd-overlay').classList.add('open');
+  document.getElementById('cmd-input').value='';
+  cmdFilt=CMD; cmdSel=0; renderCmd();
+  setTimeout(()=>document.getElementById('cmd-input').focus(),50);
+}
+function closeCmd(){ document.getElementById('cmd-overlay').classList.remove('open'); }
+function filterCmd(v){
+  cmdFilt=CMD.filter(c=>c.name.toLowerCase().includes(v.toLowerCase())||c.sub.toLowerCase().includes(v.toLowerCase()));
+  cmdSel=0; renderCmd();
+}
+function renderCmd(){
+  document.getElementById('cmd-list').innerHTML = cmdFilt.map((c,i)=>`
+    <div class="cmd-item${i===cmdSel?' hi':''}" onclick="goTo('${c.go}');closeCmd()">
+      <div class="cmd-ico">${c.ico}</div>
+      <div><div class="cmd-name">${c.name}</div><div class="cmd-sub">${c.sub}</div></div>
+    </div>`).join('');
+}
+function cmdNav(e){
+  if(e.key==='ArrowDown'){cmdSel=Math.min(cmdSel+1,cmdFilt.length-1);renderCmd();}
+  else if(e.key==='ArrowUp'){cmdSel=Math.max(cmdSel-1,0);renderCmd();}
+  else if(e.key==='Enter'&&cmdFilt[cmdSel]){goTo(cmdFilt[cmdSel].go);closeCmd();}
+  else if(e.key==='Escape')closeCmd();
+}
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();openCmd();}
+  if(e.key==='Escape')closeCmd();
+});
+
+/* ─── THEME ──────────────────────────────── */
+let dark = true;
+function toggleTheme(){
+  dark=!dark;
+  document.body.style.background = dark?'var(--off)':'#F5F5F5';
+  document.body.style.color = dark?'var(--white)':'#111';
+  document.getElementById('theme-btn').textContent = dark?'🌙':'☀️';
+}
+
+/* ─── SETTINGS ───────────────────────────── */
+function showSettings(){
+  showToast(`Device ID: ${getDeviceId().slice(0,16)}… · Plan: ${isPro?'PRO':'Free'}`);
+}
+
+/* ─── TOAST ──────────────────────────────── */
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// Init ⌘K render
+renderCmd();
+
+// Welcome toast
+setTimeout(()=>showToast(`Welcome back, ${(email.split('@')[0]||'Creator')} 👋`), 600);
+</script>
+</body>
+</html>

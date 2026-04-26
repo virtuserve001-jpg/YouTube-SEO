@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viral Velocity — NEXUS v2</title>
+
+<!-- GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7PMXBZF9PL"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-7PMXBZF9PL');</script>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+/* ─── TOKENS (exact match to dashboard) ─── */
+:root {
+  --black:    #000000;
+  --off:      #0A0A0A;
+  --s1:       #0F0F0F;
+  --s2:       #141414;
+  --s3:       #1A1A1A;
+  --s4:       #202020;
+  --line:     rgba(255,255,255,0.06);
+  --line-g:   rgba(0,255,136,0.18);
+  --line-a:   rgba(245,166,35,0.2);
+  --g1:       #00FF88;
+  --g2:       #00CC6A;
+  --amber:    #F5A623;
+  --red:      #FF4455;
+  --blue:     #4F8EF7;
+  --purple:   #9B6DFF;
+  --white:    #F0F0F0;
+  --muted:    #707070;
+  --dim:      #404040;
+  --font-d:   'Bebas Neue', sans-serif;
+  --font-b:   'DM Sans', sans-serif;
+  --font-m:   'JetBrains Mono', monospace;
+  --r:        10px;
+  --r-sm:     7px;
+  --tr:       all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ─── RESET ──────────────────────────────── */
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { height:100%; }
+body {
+  font-family: var(--font-b);
+  background: var(--off);
+  color: var(--white);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection { background: rgba(0,255,136,0.18); color: var(--g1); }
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font-b); cursor: pointer; border: none; background: none; outline: none; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--s1); }
+::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+
+/* ─── HEADER ─────────────────────────────── */
+#header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 900;
+  height: 56px;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center;
+  padding: 0 20px;
+  justify-content: space-between;
+  gap: 12px;
+}
+#header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,0.15) 30%, rgba(0,255,136,0.15) 70%, transparent);
+}
+.hdr-left { display: flex; align-items: center; gap: 12px; }
+.hdr-right { display: flex; align-items: center; gap: 10px; }
+
+.menu-btn {
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted);
+  transition: var(--tr); flex-shrink: 0;
+}
+.menu-btn:hover { border-color: var(--line-g); color: var(--g1); }
+.menu-btn svg { width: 16px; height: 16px; }
+
+.logo { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.logo-hex {
+  width: 30px; height: 30px;
+  border: 1.5px solid var(--g1); border-radius: 7px;
+  transform: rotate(45deg);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 16px rgba(0,255,136,0.2);
+  animation: hexPulse 3s ease-in-out infinite; flex-shrink: 0;
+}
+.logo-hex span { transform: rotate(-45deg); font-family: var(--font-d); font-size: 0.875rem; color: var(--g1); display: block; }
+@keyframes hexPulse {
+  0%,100%{ box-shadow: 0 0 12px rgba(0,255,136,0.15); }
+  50%{ box-shadow: 0 0 28px rgba(0,255,136,0.4); }
+}
+.logo-name { font-family: var(--font-d); font-size: 1.125rem; letter-spacing: 0.18em; color: var(--white); }
+.logo-name em { color: var(--g1); font-style: normal; }
+
+.live-badge {
+  display: flex; align-items: center; gap: 5px;
+  font-family: var(--font-m); font-size: 0.5625rem;
+  letter-spacing: 0.12em; color: var(--red);
+  background: rgba(255,68,85,0.08);
+  border: 1px solid rgba(255,68,85,0.2);
+  padding: 3px 9px; border-radius: 100px;
+}
+.live-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--red); box-shadow: 0 0 6px var(--red);
+  animation: blink 1.5s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+.online-pill {
+  display: flex; align-items: center; gap: 5px;
+  font-family: var(--font-m); font-size: 0.5625rem;
+  letter-spacing: 0.1em; color: var(--g1);
+}
+.online-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--g1); box-shadow: 0 0 6px var(--g1);
+  animation: blink 2s ease-in-out infinite;
+}
+.hdr-btn {
+  padding: 7px 14px; border-radius: var(--r-sm);
+  font-family: var(--font-m); font-size: 0.5625rem;
+  letter-spacing: 0.12em; font-weight: 700;
+  text-transform: uppercase; transition: var(--tr);
+}
+.hdr-btn-free { border: 1px solid var(--line); color: var(--muted); }
+.hdr-btn-free:hover { border-color: var(--line-g); color: var(--g1); }
+.hdr-btn-pro {
+  background: linear-gradient(135deg, var(--amber), #d48800);
+  color: #000; box-shadow: 0 0 16px rgba(245,166,35,0.25);
+  animation: proPulse 2.5s ease-in-out infinite;
+}
+@keyframes proPulse { 0%,100%{box-shadow:0 0 10px rgba(245,166,35,0.2);}50%{box-shadow:0 0 24px rgba(245,166,35,0.5);} }
+.theme-btn {
+  width: 36px; height: 36px; border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; transition: var(--tr); color: var(--muted);
+}
+.theme-btn:hover { border-color: var(--line-g); }
+
+/* ─── LAYOUT ─────────────────────────────── */
+.app-wrap { display: flex; padding-top: 56px; min-height: 100vh; }
+
+/* ─── SIDEBAR ────────────────────────────── */
+#sidebar {
+  width: 224px; flex-shrink: 0;
+  background: var(--s1); border-right: 1px solid var(--line);
+  position: fixed; top: 56px; left: 0; bottom: 0;
+  overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), width 0.3s cubic-bezier(0.4,0,0.2,1);
+  z-index: 800;
+}
+#sidebar.collapsed { width: 56px; }
+#sidebar.collapsed .nav-label,
+#sidebar.collapsed .nav-text,
+#sidebar.collapsed .nav-badge,
+#sidebar.collapsed .sb-pro { display: none; }
+#sidebar.collapsed .nav-item { justify-content: center; padding: 11px; }
+@media(max-width:768px){
+  #sidebar { transform: translateX(-100%); width: 224px !important; }
+  #sidebar.mobile-open { transform: translateX(0); }
+  #sb-overlay { display: block; }
+  .main-content { margin-left: 0 !important; }
+}
+#sb-overlay {
+  display: none; position: fixed; inset: 0;
+  z-index: 799; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+}
+
+.sb-section { padding: 16px 10px 6px; }
+.nav-label {
+  font-family: var(--font-m); font-size: 0.5rem;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--dim); padding: 0 6px; margin-bottom: 5px; white-space: nowrap;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 9px 10px; border-radius: var(--r-sm);
+  font-size: 0.875rem; font-weight: 500;
+  color: var(--muted); cursor: pointer; transition: var(--tr);
+  white-space: nowrap; border: none; background: none; text-align: left; position: relative;
+}
+.nav-item:hover { background: var(--s3); color: var(--white); }
+.nav-item.active { background: rgba(0,255,136,0.07); color: var(--g1); }
+.nav-item.active::before {
+  content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 2px; height: 18px; background: var(--g1); border-radius: 0 2px 2px 0;
+}
+.nav-icon { font-size: 1rem; width: 18px; text-align: center; flex-shrink: 0; }
+.nav-text { flex: 1; }
+.nav-badge {
+  font-family: var(--font-m); font-size: 0.5rem; letter-spacing: 0.08em;
+  padding: 2px 6px; border-radius: 4px;
+  background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.2); color: var(--amber);
+}
+.sb-pro {
+  margin: auto 10px 14px;
+  background: linear-gradient(135deg, rgba(245,166,35,0.08), rgba(245,166,35,0.03));
+  border: 1px solid var(--line-a); border-radius: var(--r);
+  padding: 14px; cursor: pointer; transition: var(--tr);
+}
+.sb-pro:hover { border-color: rgba(245,166,35,0.35); }
+.sb-pro-title { font-weight: 600; font-size: 0.875rem; color: var(--amber); margin-bottom: 4px; }
+.sb-pro-sub { font-size: 0.75rem; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+.sb-pro-btn {
+  width: 100%; padding: 8px;
+  background: linear-gradient(135deg, var(--amber), #d48800);
+  color: #000; font-weight: 700; font-size: 0.8125rem;
+  border-radius: var(--r-sm); text-align: center; transition: var(--tr);
+}
+.sb-pro-btn:hover { box-shadow: 0 4px 16px rgba(245,166,35,0.35); }
+
+/* ─── MAIN CONTENT ───────────────────────── */
+.main-content {
+  flex: 1; margin-left: 224px; min-width: 0;
+  padding: 28px 28px 80px;
+  transition: margin-left 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.main-content.collapsed { margin-left: 56px; }
+@media(max-width:768px){ .main-content { margin-left: 0 !important; padding: 16px 16px 100px; } }
+
+/* ─── PAGE HEADER ─────────────────────────── */
+.page-hdr {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  margin-bottom: 24px;
+  animation: fadeDown 0.4s ease both;
+}
+.page-hdr-left { min-width: 0; }
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-m); font-size: 0.5625rem;
+  color: var(--dim); letter-spacing: 0.12em;
+  text-transform: uppercase; margin-bottom: 10px;
+}
+.breadcrumb a { color: var(--dim); cursor: pointer; transition: color 0.2s; }
+.breadcrumb a:hover { color: var(--g1); }
+.breadcrumb .sep { color: var(--dim); }
+.page-title {
+  font-family: var(--font-d);
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  letter-spacing: 0.04em; line-height: 1.0;
+  color: var(--white);
+}
+.page-title .accent { color: var(--g1); }
+.page-sub {
+  font-size: 0.9375rem; color: var(--muted);
+  line-height: 1.6; margin-top: 6px; max-width: 520px;
+}
+.page-hdr-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-top: 4px; }
+
+/* ─── SEARCH CARD ─────────────────────────── */
+.search-card {
+  background: var(--s2);
+  border: 1px solid var(--line-g);
+  border-radius: var(--r);
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeDown 0.4s ease 0.05s both;
+}
+.search-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--g1) 40%, var(--g2) 60%, transparent);
+  opacity: 0.4;
+}
+.search-label {
+  font-family: var(--font-m); font-size: 0.5rem;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.search-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+.search-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.search-input {
+  flex: 1; min-width: 200px;
+  background: var(--s3); border: 1px solid var(--line);
+  border-radius: var(--r-sm); padding: 12px 16px;
+  font-family: var(--font-b); font-size: 0.9375rem; color: var(--white);
+  outline: none; transition: var(--tr);
+}
+.search-input::placeholder { color: var(--dim); }
+.search-input:focus { border-color: var(--line-g); box-shadow: 0 0 0 3px rgba(0,255,136,0.06); }
+.search-input.has-value { border-color: rgba(0,255,136,0.2); }
+
+.search-select {
+  background: var(--s3); border: 1px solid var(--line);
+  border-radius: var(--r-sm); padding: 12px 14px;
+  font-family: var(--font-m); font-size: 0.6875rem;
+  color: var(--muted); outline: none; transition: var(--tr);
+  cursor: pointer; min-width: 130px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23404040' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+.search-select:focus { border-color: var(--line-g); color: var(--g1); outline: none; }
+.search-select option { background: var(--s2); }
+
+.btn-scan {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--g1), var(--g2));
+  color: #000; font-family: var(--font-d);
+  font-size: 1rem; letter-spacing: 0.08em;
+  border-radius: var(--r-sm);
+  border: none; cursor: pointer;
+  transition: var(--tr); white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+  flex-shrink: 0;
+}
+.btn-scan:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,255,136,0.35); }
+.btn-scan:active { transform: translateY(0); }
+.btn-scan.loading { opacity: 0.7; pointer-events: none; }
+.btn-scan .spin { animation: spin 1s linear infinite; display: none; }
+.btn-scan.loading .spin { display: inline-block; }
+.btn-scan.loading .scan-icon { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Recent searches */
+.recent-wrap { margin-top: 12px; }
+.recent-label {
+  font-family: var(--font-m); font-size: 0.5rem;
+  color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase;
+  margin-bottom: 7px;
+}
+.recent-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.recent-pill {
+  font-family: var(--font-m); font-size: 0.6875rem;
+  padding: 4px 12px; border-radius: 100px;
+  background: var(--s3); border: 1px solid var(--line);
+  color: var(--muted); cursor: pointer; transition: var(--tr);
+  display: flex; align-items: center; gap: 5px;
+}
+.recent-pill:hover { border-color: var(--line-g); color: var(--g1); }
+.recent-pill-x {
+  opacity: 0; font-size: 0.625rem; color: var(--dim);
+  transition: opacity 0.2s; line-height: 1;
+}
+.recent-pill:hover .recent-pill-x { opacity: 1; }
+
+/* ─── LOADER ─────────────────────────────── */
+#loader-wrap {
+  display: none;
+  padding: 10px 0 20px;
+  animation: fadeDown 0.3s ease;
+}
+#loader-wrap.active { display: block; }
+
+.loader-bar-outer {
+  height: 2px; background: var(--s4);
+  border-radius: 2px; overflow: hidden; margin-bottom: 12px;
+}
+.loader-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, var(--g2), var(--g1), var(--g2));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 2px;
+  width: 100%;
+}
+@keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+
+.loader-steps {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.loader-step {
+  font-family: var(--font-m); font-size: 0.5625rem;
+  letter-spacing: 0.1em; color: var(--dim);
+  display: flex; align-items: center; gap: 5px;
+  transition: color 0.3s;
+}
+.loader-step.active { color: var(--g1); }
+.loader-step.done { color: var(--muted); }
+.loader-step .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--dim); transition: background 0.3s;
+}
+.loader-step.active .dot { background: var(--g1); box-shadow: 0 0 8px var(--g1); animation: blink 1s ease-in-out infinite; }
+.loader-step.done .dot { background: var(--g2); }
+
+/* Skeleton cards */
+.skeletons { display: none; }
+.skeletons.active { display: grid; gap: 10px; }
+.skel {
+  background: var(--s2); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 14px 16px;
+  display: flex; gap: 12px; align-items: center;
+}
+.skel-thumb {
+  width: 72px; height: 44px; border-radius: 6px; flex-shrink: 0;
+  background: linear-gradient(90deg, var(--s3) 25%, var(--s4) 50%, var(--s3) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+.skel-body { flex: 1; }
+.skel-line {
+  height: 10px; border-radius: 5px; margin-bottom: 8px;
+  background: linear-gradient(90deg, var(--s3) 25%, var(--s4) 50%, var(--s3) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+.skel-line.short { width: 55%; }
+.skel-line.xshort { width: 30%; }
+.skel-score {
+  width: 44px; height: 44px; border-radius: 6px; flex-shrink: 0;
+  background: linear-gradient(90deg, var(--s3) 25%, var(--s4) 50%, var(--s3) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ─── RESULTS ─────────────────────────────── */
+#results-wrap { display: none; animation: fadeUp 0.35s ease; }
+#results-wrap.active { display: block; }
+
+/* ─── STAT BARS (4-col) ──────────────────── */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin-bottom: 20px;
+}
+@media(max-width:640px){ .stat-row { grid-template-columns: repeat(2, 1fr); } }
+.stat-box {
+  background: var(--s2); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 16px;
+  border-left: 2px solid var(--accent, var(--g1));
+  transition: var(--tr);
+}
+.stat-box:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.08); }
+.stat-lbl {
+  font-family: var(--font-m); font-size: 0.5rem;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 8px;
+}
+.stat-val {
+  font-family: var(--font-d); font-size: 2.25rem;
+  line-height: 1; color: var(--accent, var(--g1)); margin-bottom: 3px;
+}
+.stat-meta { font-size: 0.75rem; color: var(--dim); }
+
+/* ─── GRID 2-COL ─────────────────────────── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width:780px){ .grid-2 { grid-template-columns: 1fr; } }
+
+/* ─── PANEL CARD ─────────────────────────── */
+.panel {
+  background: var(--s2); border: 1px solid var(--line);
+  border-radius: var(--r); overflow: hidden;
+  margin-bottom: 16px;
+}
+.panel-head {
+  padding: 14px 18px; border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.panel-title {
+  font-family: var(--font-m); font-size: 0.5625rem;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+}
+.panel-title::after { content: ''; display: block; width: 28px; height: 1px; background: var(--line); }
+.panel-action {
+  font-family: var(--font-m); font-size: 0.5625rem;
+  letter-spacing: 0.1em; color: var(--g1);
+  cursor: pointer; transition: var(--tr); text-transform: uppercase;
+  background: rgba(0,255,136,0.06); border: 1px solid var(--line-g);
+  padding: 4px 10px; border-radius: 4px;
+}
+.panel-action:hover { background: rgba(0,255,136,0.1); }
+.panel-body { padding: 16px 18px; }
+
+/* ─── CHART WRAPPER ──────────────────────── */
+.chart-wrap { position: relative; height: 190px; }
+
+/* ─── HEATMAP ─────────────────────────────── */
+.heatmap-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 5px; margin-top: 8px;
+}
+.hm-cell {
+  aspect-ratio: 1; border-radius: 5px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-family: var(--font-m); font-size: 0.5rem;
+  font-weight: 700; cursor: default;
+  transition: transform 0.15s;
+  line-height: 1.3;
+}
+.hm-cell:hover { transform: scale(1.12); }
+.hm-label {
+  font-family: var(--font-m); font-size: 0.5rem;
+  color: var(--dim); letter-spacing: 0.08em;
+  margin-bottom: 4px; text-transform: uppercase;
+}
+#hm-best-day {
+  font-family: var(--font-m); font-size: 0.6875rem;
+  color: var(--dim); margin-top: 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+#hm-best-day span { color: var(--g1); }
+
+/* ─── RESULT ROWS ─────────────────────────── */
+.result-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  transition: var(--tr); cursor: pointer;
+}
+.result-row:last-child { border-bottom: none; }
+.result-row:hover { padding-left: 6px; }
+.result-row:hover .result-title { color: var(--g1); }
+
+.result-rank {
+  font-family: var(--font-d); font-size: 1.5rem;
+  line-height: 1; min-width: 36px; text-align: center; flex-shrink: 0;
+  padding-top: 2px;
+}
+.result-thumb {
+  width: 76px; height: 46px; border-radius: 5px;
+  background: var(--s3); flex-shrink: 0; overflow: hidden;
+}
+.result-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.result-body { flex: 1; min-width: 0; }
+.result-title {
+  font-size: 0.875rem; font-weight: 500;
+  line-height: 1.35; color: var(--white);
+  overflow: hidden; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  margin-bottom: 5px; transition: color 0.2s;
+}
+.result-meta {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  align-items: center;
+  font-family: var(--font-m); font-size: 0.5625rem;
+  color: var(--dim); letter-spacing: 0.06em;
+}
+.vel-badge {
+  font-family: var(--font-m); font-size: 0.5rem;
+  letter-spacing: 0.1em; padding: 2px 8px; border-radius: 4px;
+  font-weight: 700; text-transform: uppercase;
+}
+.vel-bar {
+  height: 2px; background: var(--s4);
+  border-radius: 2px; overflow: hidden; margin-top: 7px;
+}
+.vel-bar-fill {
+  height: 100%; border-radius: 2px;
+  transition: width 0.9s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* Copy flash */
+.result-row.copied .result-title::after {
+  content: ' ✓ Copied';
+  font-family: var(--font-m); font-size: 0.5625rem;
+  color: var(--g1); letter-spacing: 0.1em;
+}
+
+/* ─── KEYWORD TAGS ────────────────────────── */
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+.kw-tag {
+  font-family: var(--font-m); font-size: 0.625rem;
+  padding: 5px 12px; border-radius: 5px;
+  cursor: pointer; transition: var(--tr);
+  letter-spacing: 0.06em; border: 1px solid transparent;
+}
+.kw-tag:hover { transform: translateY(-2px); }
+.kw-green { background: rgba(0,255,136,0.06); border-color: rgba(0,255,136,0.18); color: var(--g1); }
+.kw-blue  { background: rgba(79,142,247,0.06); border-color: rgba(79,142,247,0.18); color: var(--blue); }
+.kw-amber { background: rgba(245,166,35,0.06); border-color: rgba(245,166,35,0.18); color: var(--amber); }
+.kw-red   { background: rgba(255,68,85,0.06);  border-color: rgba(255,68,85,0.18);  color: var(--red); }
+.kw-dim   { background: var(--s3); border-color: var(--line); color: var(--muted); }
+
+/* ─── INSIGHT STRIP ──────────────────────── */
+.insight-strip {
+  background: var(--s2); border: 1px solid var(--line);
+  border-radius: var(--r); padding: 16px 20px;
+  margin-bottom: 16px;
+  display: flex; gap: 20px; flex-wrap: wrap;
+}
+.insight-item { flex: 1; min-width: 140px; }
+.insight-lbl {
+  font-family: var(--font-m); font-size: 0.5rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 5px;
+}
+.insight-val {
+  font-family: var(--font-d); font-size: 1.25rem;
+  letter-spacing: 0.03em; color: var(--white);
+}
+.insight-val.green { color: var(--g1); }
+.insight-val.red { color: var(--red); }
+.insight-val.amber { color: var(--amber); }
+.insight-sub { font-size: 0.75rem; color: var(--dim); margin-top: 2px; }
+
+/* ─── PRO STRIP ──────────────────────────── */
+.pro-strip {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; flex-wrap: wrap;
+  background: linear-gradient(90deg, rgba(245,166,35,0.06), rgba(245,166,35,0.02));
+  border: 1px solid var(--line-a); border-radius: var(--r);
+  padding: 14px 20px; margin-bottom: 16px;
+  cursor: pointer; transition: var(--tr);
+}
+.pro-strip:hover { border-color: rgba(245,166,35,0.35); }
+.pro-strip-left { display: flex; align-items: center; gap: 12px; }
+.pro-strip-icon {
+  width: 36px; height: 36px; border-radius: 9px;
+  background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.pro-strip-title { font-weight: 600; font-size: 0.9375rem; color: var(--amber); margin-bottom: 2px; }
+.pro-strip-sub { font-size: 0.8125rem; color: var(--muted); }
+
+/* ─── EMPTY STATE ─────────────────────────── */
+#empty-state {
+  display: none;
+  text-align: center; padding: 56px 24px;
+  animation: fadeUp 0.3s ease;
+}
+#empty-state.active { display: block; }
+.empty-icon {
+  font-size: 3rem; margin-bottom: 14px;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+.empty-title {
+  font-family: var(--font-d); font-size: 1.5rem;
+  letter-spacing: 0.04em; color: var(--white);
+  margin-bottom: 8px;
+}
+.empty-sub { font-size: 0.9375rem; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+.empty-examples { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.empty-example {
+  font-family: var(--font-m); font-size: 0.6875rem;
+  padding: 7px 16px; border-radius: 100px;
+  background: var(--s2); border: 1px solid var(--line);
+  color: var(--muted); cursor: pointer; transition: var(--tr);
+}
+.empty-example:hover { border-color: var(--line-g); color: var(--g1); }
+
+/* ─── TOOLTIPS ───────────────────────────── */
+[data-tip] { position: relative; }
+[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: var(--s3); border: 1px solid var(--line);
+  color: var(--white); font-family: var(--font-m); font-size: 0.625rem;
+  padding: 5px 10px; border-radius: 5px; white-space: nowrap;
+  z-index: 9000; pointer-events: none; max-width: 200px;
+  white-space: normal; text-align: center; line-height: 1.5;
+}
+
+/* ─── BOTTOM NAV (mobile) ────────────────── */
+#bottom-nav {
+  display: none; position: fixed;
+  bottom: 0; left: 0; right: 0; z-index: 850;
+  background: rgba(10,10,10,0.96);
+  border-top: 1px solid var(--line);
+  backdrop-filter: blur(20px);
+  padding: 6px 0 env(safe-area-inset-bottom, 8px);
+}
+@media(max-width:768px){ #bottom-nav { display: flex; } }
+.bn-inner { display: flex; width: 100%; justify-content: space-around; }
+.bn-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 3px; padding: 6px 4px;
+  font-family: var(--font-m); font-size: 0.5rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--dim); cursor: pointer; transition: 0.2s;
+  border: none; background: none;
+}
+.bn-item.active { color: var(--g1); }
+.bn-icon { font-size: 1.25rem; }
+
+/* ─── TOAST ──────────────────────────────── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--s2); border: 1px solid var(--line-g);
+  color: var(--white); font-size: 0.875rem;
+  padding: 12px 22px; border-radius: var(--r-sm);
+  z-index: 9999;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  white-space: nowrap; pointer-events: none;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ─── CMD PALETTE ─────────────────────────── */
+#cmd-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(10px);
+  display: none; align-items: flex-start; justify-content: center;
+  padding-top: 12vh;
+}
+#cmd-overlay.open { display: flex; }
+#cmd-box {
+  background: var(--s2); border: 1px solid var(--line-g);
+  border-radius: var(--r); width: 100%; max-width: 540px; overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6); animation: fadeDown 0.2s ease;
+}
+#cmd-input {
+  width: 100%; background: transparent; border: none;
+  color: var(--white); font-family: var(--font-b);
+  font-size: 1rem; padding: 18px 20px;
+  border-bottom: 1px solid var(--line); outline: none;
+}
+#cmd-input::placeholder { color: var(--dim); }
+.cmd-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 20px; cursor: pointer; transition: 0.15s;
+}
+.cmd-item:hover, .cmd-item.hi { background: rgba(0,255,136,0.06); }
+.cmd-item.hi .cmd-name { color: var(--g1); }
+.cmd-ico { width: 30px; height: 30px; border-radius: 7px; background: var(--s3); display: flex; align-items: center; justify-content: center; font-size: 0.875rem; }
+.cmd-name { font-size: 0.9375rem; font-weight: 500; color: var(--white); }
+.cmd-sub { font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
+.cmd-hint { padding: 9px 20px; border-top: 1px solid var(--line); font-family: var(--font-m); font-size: 0.5625rem; color: var(--dim); letter-spacing: 0.1em; }
+
+/* ─── ANIMATIONS ─────────────────────────── */
+@keyframes fadeDown { from{opacity:0;transform:translateY(-12px);} to{opacity:1;transform:translateY(0);} }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(14px);}  to{opacity:1;transform:translateY(0);} }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- CMD Overlay -->
+<div id="cmd-overlay" onclick="if(event.target===this)closeCmd()">
+  <div id="cmd-box">
+    <input id="cmd-input" type="text" placeholder="Search tools… ⌘K" oninput="filterCmd(this.value)" onkeydown="cmdNav(event)" autocomplete="off">
+    <div id="cmd-list"></div>
+    <div class="cmd-hint">↑↓ navigate &nbsp;·&nbsp; Enter to open &nbsp;·&nbsp; Esc to close</div>
+  </div>
+</div>
+
+<!-- Sidebar overlay (mobile) -->
+<div id="sb-overlay" onclick="closeSidebar()"></div>
+
+<!-- ════ HEADER ════ -->
+<header id="header">
+  <div class="hdr-left">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <div class="logo" onclick="goTo('dashboard')">
+      <div class="logo-hex"><span>N</span></div>
+      <div><div class="logo-name">NEXUS <em>v2</em></div></div>
+    </div>
+    <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+  </div>
+  <div class="hdr-right">
+    <div class="online-pill"><span class="online-dot"></span><span id="online-count">247</span>&nbsp;online</div>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">🌙</button>
+    <button class="hdr-btn hdr-btn-free" id="tier-btn" onclick="goTo('pro')">✦ Free</button>
+    <button class="hdr-btn" style="background:rgba(0,255,136,0.07);border:1px solid var(--line-g);color:var(--g1);font-family:var(--font-m);font-size:0.5rem;letter-spacing:0.1em;" onclick="openCmd()" title="⌘K">⌘K</button>
+  </div>
+</header>
+
+<!-- ════ APP ════ -->
+<div class="app-wrap">
+
+  <!-- ════ SIDEBAR ════ -->
+  <nav id="sidebar">
+    <div class="sb-section">
+      <div class="nav-label">Main</div>
+      <button class="nav-item" onclick="goTo('dashboard')">
+        <span class="nav-icon">⊞</span><span class="nav-text">Dashboard</span>
+      </button>
+    </div>
+    <div class="sb-section">
+      <div class="nav-label">Free Tools</div>
+      <button class="nav-item active" id="nav-viral">
+        <span class="nav-icon">⚡</span><span class="nav-text">Viral Velocity</span>
+      </button>
+      <button class="nav-item" onclick="goTo('title-dna')">
+        <span class="nav-icon">🧬</span><span class="nav-text">Title DNA</span>
+      </button>
+      <button class="nav-item" onclick="goTo('niche-map')">
+        <span class="nav-icon">🗺</span><span class="nav-text">Niche Map</span>
+      </button>
+      <button class="nav-item" onclick="goTo('seo-matrix')">
+        <span class="nav-icon">📊</span><span class="nav-text">SEO Matrix</span>
+      </button>
+      <button class="nav-item" onclick="goTo('live-feed')">
+        <span class="nav-icon">📡</span><span class="nav-text">Live Feed</span>
+      </button>
+    </div>
+    <div class="sb-section">
+      <div class="nav-label">PRO Tools</div>
+      <button class="nav-item" onclick="goTo('pro-momentum')">
+        <span class="nav-icon">📈</span><span class="nav-text">Trend Momentum</span>
+        <span class="nav-badge">PRO</span>
+      </button>
+      <button class="nav-item" onclick="goTo('pro-gap')">
+        <span class="nav-icon">🔍</span><span class="nav-text">Gap Finder</span>
+        <span class="nav-badge">PRO</span>
+      </button>
+      <button class="nav-item" onclick="goTo('pro-weak')">
+        <span class="nav-icon">⚔</span><span class="nav-text">Weakness Report</span>
+        <span class="nav-badge">PRO</span>
+      </button>
+      <button class="nav-item" onclick="goTo('pro-firstmover')">
+        <span class="nav-icon">★</span><span class="nav-text">First Mover</span>
+        <span class="nav-badge">PRO</span>
+      </button>
+    </div>
+    <div class="sb-section">
+      <div class="nav-label">Account</div>
+      <button class="nav-item" onclick="goTo('pro')">
+        <span class="nav-icon">✦</span><span class="nav-text">Upgrade to PRO</span>
+      </button>
+      <button class="nav-item" onclick="showSettings()">
+        <span class="nav-icon">⚙</span><span class="nav-text">Settings</span>
+      </button>
+      <button class="nav-item" onclick="window.open('https://wa.me/2349076223484','_blank')">
+        <span class="nav-icon">💬</span><span class="nav-text">Support</span>
+      </button>
+    </div>
+    <div class="sb-pro" onclick="goTo('pro')">
+      <div class="sb-pro-title">✦ Unlock PRO</div>
+      <div class="sb-pro-sub">Trend Momentum, Gap Finder, Weakness Report + First Mover Alert</div>
+      <div class="sb-pro-btn">Activate Now →</div>
+    </div>
+  </nav>
+
+  <!-- ════ MAIN ════ -->
+  <main class="main-content" id="main">
+
+    <!-- Page header -->
+    <div class="page-hdr">
+      <div class="page-hdr-left">
+        <div class="breadcrumb">
+          <a onclick="goTo('dashboard')">Dashboard</a>
+          <span class="sep">/</span>
+          <span>Viral Velocity</span>
+        </div>
+        <div class="page-title">VIRAL <span class="accent">VELOCITY</span></div>
+        <div class="page-sub">Score any keyword 0–100 for momentum. Scan what's exploding right now, see why it ranks, and find your next viral opportunity.</div>
+      </div>
+      <div class="page-hdr-right">
+        <div style="font-family:var(--font-m);font-size:0.5rem;letter-spacing:0.12em;color:var(--dim);text-align:right;">
+          SEARCHES TODAY<br>
+          <span style="font-family:var(--font-d);font-size:1.25rem;color:var(--g1);" id="scan-count">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search card -->
+    <div class="search-card">
+      <div class="search-label">Keyword or Topic</div>
+      <div class="search-row">
+        <input
+          type="text"
+          id="vel-q"
+          class="search-input"
+          placeholder="e.g. MrBeast Challenge, iPhone 17, passive income Nigeria…"
+          autocomplete="off"
+          oninput="this.classList.toggle('has-value', this.value.length > 0)"
+          onkeydown="if(event.key==='Enter') runScan()"
+        >
+        <select id="vel-ord" class="search-select">
+          <option value="relevance">By Relevance</option>
+          <option value="date">Most Recent</option>
+          <option value="viewCount">Most Viewed</option>
+          <option value="rating">Top Rated</option>
+        </select>
+        <button class="btn-scan" id="scan-btn" onclick="runScan()">
+          <span class="scan-icon">⚡</span>
+          <span class="spin">↻</span>
+          SCAN
+        </button>
+      </div>
+
+      <!-- Recent searches -->
+      <div class="recent-wrap" id="recent-wrap" style="display:none;">
+        <div class="recent-label">Recent searches</div>
+        <div class="recent-pills" id="recent-pills"></div>
+      </div>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader-wrap">
+      <div class="loader-bar-outer"><div class="loader-bar-inner"></div></div>
+      <div class="loader-steps">
+        <div class="loader-step active" id="step-1"><div class="dot"></div> FETCHING RECENT VIDEOS</div>
+        <div class="loader-step"        id="step-2"><div class="dot"></div> FETCHING BY RELEVANCE</div>
+        <div class="loader-step"        id="step-3"><div class="dot"></div> COMPUTING VELOCITY SCORES</div>
+        <div class="loader-step"        id="step-4"><div class="dot"></div> BUILDING ANALYSIS</div>
+      </div>
+      <!-- Skeleton -->
+      <div class="skeletons active" style="margin-top:20px;">
+        <div class="skel"><div class="skel-score"></div><div class="skel-thumb"></div><div class="skel-body"><div class="skel-line"></div><div class="skel-line short"></div><div class="skel-line xshort"></div></div></div>
+        <div class="skel"><div class="skel-score"></div><div class="skel-thumb"></div><div class="skel-body"><div class="skel-line"></div><div class="skel-line short"></div><div class="skel-line xshort"></div></div></div>
+        <div class="skel"><div class="skel-score"></div><div class="skel-thumb"></div><div class="skel-body"><div class="skel-line"></div><div class="skel-line short"></div><div class="skel-line xshort"></div></div></div>
+        <div class="skel"><div class="skel-score"></div><div class="skel-thumb"></div><div class="skel-body"><div class="skel-line"></div><div class="skel-line short"></div><div class="skel-line xshort"></div></div></div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="active">
+      <div class="empty-icon">⚡</div>
+      <div class="empty-title">SCAN ANY KEYWORD</div>
+      <div class="empty-sub">Enter a topic above and hit SCAN — we'll show you which videos are exploding right now, their momentum scores, and when to publish for maximum impact.</div>
+      <div class="empty-examples">
+        <div class="empty-example" onclick="prefillAndScan('MrBeast Challenge')">MrBeast Challenge</div>
+        <div class="empty-example" onclick="prefillAndScan('iPhone 17 review')">iPhone 17 review</div>
+        <div class="empty-example" onclick="prefillAndScan('passive income Nigeria')">passive income Nigeria</div>
+        <div class="empty-example" onclick="prefillAndScan('skincare routine 2025')">skincare routine 2025</div>
+        <div class="empty-example" onclick="prefillAndScan('Afrobeats 2025')">Afrobeats 2025</div>
+        <div class="empty-example" onclick="prefillAndScan('AI side hustle')">AI side hustle</div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results-wrap">
+
+      <!-- Stat row -->
+      <div class="stat-row" id="stat-row"></div>
+
+      <!-- Insight strip -->
+      <div class="insight-strip" id="insight-strip"></div>
+
+      <!-- Chart + Heatmap -->
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title" data-tip="Each bar = one video's velocity score. Taller = more momentum.">Velocity Distribution</div>
+          </div>
+          <div class="panel-body">
+            <div class="chart-wrap"><canvas id="vel-chart"></canvas></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title" data-tip="Which day of the week top creators publish in this niche.">Upload Day Heatmap</div>
+          </div>
+          <div class="panel-body">
+            <div class="hm-label">ACTIVITY BY DAY OF WEEK</div>
+            <div class="heatmap-grid" id="heatmap"></div>
+            <div id="hm-best-day"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rankings -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title" data-tip="Videos ranked by velocity score. Click any row to copy the title.">Velocity Rankings</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="result-count" style="font-family:var(--font-m);font-size:0.5625rem;color:var(--dim);"></span>
+            <div class="panel-action" onclick="copyTopTitles()">Copy Top 5</div>
+          </div>
+        </div>
+        <div class="panel-body" style="padding:4px 18px;">
+          <div id="result-rows"></div>
+        </div>
+      </div>
+
+      <!-- Related keyword tags -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title" data-tip="Click any tag to instantly scan that related keyword.">Related Keywords — Click to Scan</div>
+        </div>
+        <div class="panel-body">
+          <div class="tag-cloud" id="tag-cloud"></div>
+        </div>
+      </div>
+
+      <!-- PRO upsell -->
+      <div class="pro-strip" onclick="goTo('pro')" id="pro-strip">
+        <div class="pro-strip-left">
+          <div class="pro-strip-icon">📈</div>
+          <div>
+            <div class="pro-strip-title">See if this keyword is RISING or FALLING — Trend Momentum</div>
+            <div class="pro-strip-sub">PRO feature · Know the trajectory before you invest filming time · ₦3,000/mo</div>
+          </div>
+        </div>
+        <button class="hdr-btn hdr-btn-pro" style="padding:9px 18px;font-size:0.5625rem;flex-shrink:0;">Unlock PRO →</button>
+      </div>
+
+    </div><!-- /results-wrap -->
+
+    <!-- Bottom nav (mobile) -->
+    <div id="bottom-nav">
+      <div class="bn-inner">
+        <button class="bn-item" onclick="goTo('dashboard')"><span class="bn-icon">⊞</span>Home</button>
+        <button class="bn-item active"><span class="bn-icon">⚡</span>Velocity</button>
+        <button class="bn-item" onclick="goTo('title-dna')"><span class="bn-icon">🧬</span>DNA</button>
+        <button class="bn-item" onclick="goTo('live-feed')"><span class="bn-icon">📡</span>Live</button>
+        <button class="bn-item" onclick="goTo('pro')"><span class="bn-icon">✦</span>PRO</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// NEXUS v2 — Viral Velocity Page
+// ═══════════════════════════════════════════════════════════
+
+const YT_KEY   = 'AIzaSyAQN1-kmCk5unltbHdSMEfx5H6No0rLGiM';
+const WA       = '2349076223484';
+const STORE_KEY = 'nexus_searches_vel';
+
+let charts       = {};
+let isPro        = false;
+let sidebarCollapsed = false;
+let currentResults   = [];
+let scanCount        = parseInt(sessionStorage.getItem('nexus_vel_scans') || '0');
+
+// ── INIT ─────────────────────────────────────────────────
+(function init() {
+  // Auth check
+  const email = localStorage.getItem('nexus_email');
+  if (!email) { window.location.href = 'nexus-register.html'; return; }
+
+  // PRO check
+  const stored = localStorage.getItem('_nexus_pro');
+  if (stored) {
+    const [k, did, ym] = stored.split('|');
+    const now = new Date();
+    const curYm = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0');
+    if (did === getDeviceId() && ym === curYm) {
+      isPro = true;
+      document.getElementById('tier-btn').textContent = '★ PRO';
+      document.getElementById('tier-btn').className = 'hdr-btn hdr-btn-pro';
+      document.getElementById('pro-strip').style.display = 'none';
+    }
+  }
+
+  // Scan counter display
+  document.getElementById('scan-count').textContent = scanCount;
+
+  // Recent searches
+  renderRecent();
+
+  // Prefill from sessionStorage (cross-page navigation)
+  const prefill = sessionStorage.getItem('nexus_prefill_vel');
+  if (prefill) {
+    sessionStorage.removeItem('nexus_prefill_vel');
+    const inp = document.getElementById('vel-q');
+    inp.value = prefill;
+    inp.classList.add('has-value');
+    setTimeout(runScan, 300);
+  }
+
+  // Online count
+  updateOnline();
+  setInterval(updateOnline, 10000);
+
+  // GA4
+  try { gtag('event', 'page_view', { page: 'viral-velocity' }); } catch(e) {}
+})();
+
+// ── UTILS ─────────────────────────────────────────────────
+function getDeviceId() {
+  let did = localStorage.getItem('_nexus_did');
+  if (!did) {
+    did = 'DEV-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
+    localStorage.setItem('_nexus_did', did);
+  }
+  return did;
+}
+
+function fmtN(n) {
+  n = parseInt(n || 0);
+  if (n >= 1e9) return (n/1e9).toFixed(1)+'B';
+  if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
+  if (n >= 1e3) return (n/1e3).toFixed(0)+'K';
+  return n || '—';
+}
+
+function daysAgo(d) { return Math.max(1, Math.floor((Date.now() - new Date(d)) / 86400000)); }
+
+function updateOnline() {
+  const n = Math.floor(180 + Math.random() * 140);
+  document.getElementById('online-count').textContent = n;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function prefillAndScan(q) {
+  const inp = document.getElementById('vel-q');
+  inp.value = q; inp.classList.add('has-value');
+  runScan();
+}
+
+// ── VELOCITY ALGORITHM ────────────────────────────────────
+// Strict multi-signal scoring: recency, upload rate, position
+function velScore(item, idx) {
+  const pub  = item.snippet?.publishedAt || new Date().toISOString();
+  const days = daysAgo(pub);
+
+  // Estimated views via position-weighted log scale
+  const posWeight = 1 - (idx / 25);
+  const estViews  = Math.floor(80000 / Math.log10(days + 2) * (0.4 + posWeight * 0.6));
+  const vPerDay   = estViews / days;
+
+  // Recency multiplier — heavily penalises old content
+  const recency = days <= 2  ? 2.4
+                : days <= 7  ? 2.0
+                : days <= 14 ? 1.6
+                : days <= 30 ? 1.2
+                : days <= 90 ? 0.9
+                : days <= 365? 0.6
+                : 0.25;
+
+  const raw   = vPerDay * recency;
+  const score = Math.min(100, Math.max(0, Math.round(Math.log10(raw + 1) * 22 - days * 0.04)));
+  const label = score >= 80 ? 'VIRAL'
+              : score >= 65 ? 'HOT'
+              : score >= 50 ? 'RISING'
+              : score >= 35 ? 'ACTIVE'
+              : score >= 20 ? 'SLOW'
+              : 'STALE';
+
+  // Badge style
+  const badge = score >= 80 ? 'background:rgba(255,68,85,0.12);border:1px solid rgba(255,68,85,0.3);color:var(--red)'
+              : score >= 65 ? 'background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.25);color:var(--g1)'
+              : score >= 50 ? 'background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.25);color:var(--blue)'
+              : score >= 35 ? 'background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.25);color:var(--amber)'
+              : 'background:var(--s3);border:1px solid var(--line);color:var(--muted)';
+
+  const col = score >= 80 ? 'var(--red)'
+            : score >= 65 ? 'var(--g1)'
+            : score >= 50 ? 'var(--blue)'
+            : score >= 35 ? 'var(--amber)'
+            : 'var(--muted)';
+
+  return { score, label, days, estViews, vPerDay: Math.round(vPerDay), badge, col };
+}
+
+// ── RECENT SEARCHES ───────────────────────────────────────
+function saveSearch(q) {
+  let searches = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+  searches = [q, ...searches.filter(s => s !== q)].slice(0, 5);
+  localStorage.setItem(STORE_KEY, JSON.stringify(searches));
+  renderRecent();
+}
+
+function renderRecent() {
+  const searches = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+  const wrap  = document.getElementById('recent-wrap');
+  const pills = document.getElementById('recent-pills');
+  if (!searches.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  pills.innerHTML = searches.map(q => `
+    <div class="recent-pill" onclick="prefillAndScan('${q.replace(/'/g,"\\'")}')">
+      ${q}
+      <span class="recent-pill-x" onclick="event.stopPropagation();removeSearch('${q.replace(/'/g,"\\'")}')">✕</span>
+    </div>`).join('');
+}
+
+function removeSearch(q) {
+  let searches = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+  searches = searches.filter(s => s !== q);
+  localStorage.setItem(STORE_KEY, JSON.stringify(searches));
+  renderRecent();
+}
+
+// ── LOADER STEPS ──────────────────────────────────────────
+let stepTimer = null;
+function startSteps() {
+  ['step-1','step-2','step-3','step-4'].forEach(id => {
+    const el = document.getElementById(id);
+    el.classList.remove('active','done');
+  });
+  document.getElementById('step-1').classList.add('active');
+  let cur = 1;
+  stepTimer = setInterval(() => {
+    if (cur >= 4) { clearInterval(stepTimer); return; }
+    document.getElementById('step-' + cur).classList.remove('active');
+    document.getElementById('step-' + cur).classList.add('done');
+    cur++;
+    document.getElementById('step-' + cur).classList.add('active');
+  }, 600);
+}
+
+// ── MAIN SCAN ─────────────────────────────────────────────
+async function runScan() {
+  const q   = document.getElementById('vel-q').value.trim();
+  const ord = document.getElementById('vel-ord').value;
+  if (!q) { showToast('Enter a keyword first'); document.getElementById('vel-q').focus(); return; }
+
+  // UI: loading state
+  const btn = document.getElementById('scan-btn');
+  btn.classList.add('loading');
+  document.getElementById('loader-wrap').classList.add('active');
+  document.getElementById('empty-state').classList.remove('active');
+  document.getElementById('results-wrap').classList.remove('active');
+  startSteps();
+
+  try {
+    // Parallel fetches
+    const [byDate, byOrd] = await Promise.all([
+      ytFetch(`search?part=snippet&q=${encodeURIComponent(q)}&type=video&maxResults=15&order=date`),
+      ytFetch(`search?part=snippet&q=${encodeURIComponent(q)}&type=video&maxResults=15&order=${ord}`)
+    ]);
+
+    // Deduplicate
+    const seen  = new Set();
+    const items = [...(byDate.items||[]), ...(byOrd.items||[])]
+      .filter(v => { if (seen.has(v.id.videoId)) return false; seen.add(v.id.videoId); return true; })
+      .slice(0, 22);
+
+    if (!items.length) throw new Error('No results found for "' + q + '"');
+
+    // Score & sort
+    const scored = items
+      .map((v, idx) => ({ ...v, vel: velScore(v, idx) }))
+      .sort((a, b) => b.vel.score - a.vel.score);
+
+    currentResults = scored;
+
+    // Save + counter
+    saveSearch(q);
+    scanCount++;
+    sessionStorage.setItem('nexus_vel_scans', scanCount);
+    document.getElementById('scan-count').textContent = scanCount;
+
+    // GA4
+    try { gtag('event', 'velocity_scan', { keyword: q, results: scored.length }); } catch(e) {}
+
+    // Render
+    renderStats(scored, q);
+    renderInsights(scored);
+    renderChart(scored);
+    renderHeatmap(items);
+    renderRows(scored, q);
+    renderTags(q);
+
+    // Show results
+    document.getElementById('results-wrap').classList.add('active');
+
+  } catch(err) {
+    showToast('⚠ ' + (err.message || 'API error — try again'));
+    document.getElementById('empty-state').classList.add('active');
+  } finally {
+    clearInterval(stepTimer);
+    document.getElementById('loader-wrap').classList.remove('active');
+    btn.classList.remove('loading');
+  }
+}
+
+// ── YT FETCH ─────────────────────────────────────────────
+async function ytFetch(path) {
+  const r = await fetch(`https://www.googleapis.com/youtube/v3/${path}&key=${YT_KEY}`);
+  if (!r.ok) {
+    const e = await r.json().catch(() => ({}));
+    throw new Error(e?.error?.message || 'YouTube API ' + r.status);
+  }
+  return r.json();
+}
+
+// ── RENDER: STATS ─────────────────────────────────────────
+function renderStats(scored, q) {
+  const avg   = Math.round(scored.reduce((s,v) => s + v.vel.score, 0) / scored.length);
+  const viral = scored.filter(v => v.vel.score >= 80).length;
+  const hot   = scored.filter(v => v.vel.score >= 65 && v.vel.score < 80).length;
+  const stale = scored.filter(v => v.vel.score < 35).length;
+
+  const nicheCol = avg >= 65 ? 'var(--red)'
+                 : avg >= 50 ? 'var(--g1)'
+                 : avg >= 35 ? 'var(--amber)'
+                 : 'var(--muted)';
+  const nicheSig = avg >= 65 ? '🔥 HOT NICHE'
+                 : avg >= 50 ? '↑ ACTIVE'
+                 : avg >= 35 ? '→ MODERATE'
+                 : '↓ COOLING';
+
+  document.getElementById('stat-row').innerHTML = `
+    <div class="stat-box" style="--accent:${nicheCol}" data-tip="Average velocity score across all ${scored.length} scanned videos">
+      <div class="stat-lbl">Avg Velocity</div>
+      <div class="stat-val">${avg}</div>
+      <div class="stat-meta">${nicheSig}</div>
+    </div>
+    <div class="stat-box" style="--accent:var(--red)" data-tip="Videos with a score of 80+ — true viral momentum">
+      <div class="stat-lbl">Viral (80+)</div>
+      <div class="stat-val">${viral}</div>
+      <div class="stat-meta">${viral ? 'Act now' : 'None found'}</div>
+    </div>
+    <div class="stat-box" style="--accent:var(--g1)" data-tip="Hot videos with scores 65–79 — strong momentum">
+      <div class="stat-lbl">Hot (65–79)</div>
+      <div class="stat-val">${hot}</div>
+      <div class="stat-meta">${hot ? 'Strong signal' : 'None found'}</div>
+    </div>
+    <div class="stat-box" style="--accent:var(--muted)" data-tip="Videos scoring below 35 — low momentum, avoid copying">
+      <div class="stat-lbl">Stale (&lt;35)</div>
+      <div class="stat-val">${stale}</div>
+      <div class="stat-meta">${stale ? 'Skip these' : 'None'}</div>
+    </div>`;
+}
+
+// ── RENDER: INSIGHTS ──────────────────────────────────────
+function renderInsights(scored) {
+  const avg    = Math.round(scored.reduce((s,v) => s + v.vel.score, 0) / scored.length);
+  const top    = scored[0];
+  const ages   = scored.map(v => v.vel.days);
+  const avgAge = Math.round(ages.reduce((s,a) => s+a, 0) / ages.length);
+  const newest = Math.min(...ages);
+
+  const niched = avg >= 65 ? { txt: 'EXPLOSIVE', cls: 'red' }
+               : avg >= 50 ? { txt: 'ACTIVE',    cls: 'green' }
+               : avg >= 35 ? { txt: 'MODERATE',  cls: 'amber' }
+               : { txt: 'COOLING', cls: '' };
+
+  document.getElementById('insight-strip').innerHTML = `
+    <div class="insight-item">
+      <div class="insight-lbl">Niche Signal</div>
+      <div class="insight-val ${niched.cls}">${niched.txt}</div>
+      <div class="insight-sub">Overall niche momentum</div>
+    </div>
+    <div class="insight-item">
+      <div class="insight-lbl">Top Score</div>
+      <div class="insight-val green">${top.vel.score}/100</div>
+      <div class="insight-sub">Highest velocity found</div>
+    </div>
+    <div class="insight-item">
+      <div class="insight-lbl">Avg Video Age</div>
+      <div class="insight-val">${avgAge}d</div>
+      <div class="insight-sub">Days since published</div>
+    </div>
+    <div class="insight-item">
+      <div class="insight-lbl">Freshest Upload</div>
+      <div class="insight-val ${newest <= 3 ? 'green' : newest <= 14 ? 'amber' : 'red'}">${newest}d ago</div>
+      <div class="insight-sub">Most recent in this niche</div>
+    </div>
+    <div class="insight-item">
+      <div class="insight-lbl">Est. Best Day</div>
+      <div class="insight-val green" id="best-day-ins">—</div>
+      <div class="insight-sub">Calculated from heatmap</div>
+    </div>`;
+}
+
+// ── RENDER: CHART ─────────────────────────────────────────
+function renderChart(scored) {
+  if (charts.vel) charts.vel.destroy();
+  const ctx = document.getElementById('vel-chart').getContext('2d');
+  charts.vel = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: scored.map((_,i) => '#'+(i+1)),
+      datasets: [{
+        label: 'Velocity Score',
+        data: scored.map(v => v.vel.score),
+        backgroundColor: scored.map(v =>
+          v.vel.score >= 80 ? 'rgba(255,68,85,0.45)'
+        : v.vel.score >= 65 ? 'rgba(0,255,136,0.35)'
+        : v.vel.score >= 50 ? 'rgba(79,142,247,0.3)'
+        : v.vel.score >= 35 ? 'rgba(245,166,35,0.25)'
+        : 'rgba(64,64,64,0.3)'),
+        borderColor: scored.map(v =>
+          v.vel.score >= 80 ? 'rgba(255,68,85,0.8)'
+        : v.vel.score >= 65 ? 'rgba(0,255,136,0.7)'
+        : v.vel.score >= 50 ? 'rgba(79,142,247,0.6)'
+        : v.vel.score >= 35 ? 'rgba(245,166,35,0.5)'
+        : 'rgba(64,64,64,0.5)'),
+        borderWidth: 1,
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#141414',
+          borderColor: 'rgba(0,255,136,0.2)',
+          borderWidth: 1,
+          titleFont: { family: 'JetBrains Mono', size: 10 },
+          bodyFont:  { family: 'JetBrains Mono', size: 11 },
+          callbacks: {
+            label: c => ` Score: ${c.raw} — ${scored[c.dataIndex]?.vel?.label || ''}`,
+            title: c => scored[c[0].dataIndex]?.snippet?.title?.slice(0,40) + '…'
+          }
+        }
+      },
+      scales: {
+        x: { ticks: { color: '#404040', font: { family: 'JetBrains Mono', size: 8 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+        y: { min: 0, max: 100, ticks: { color: '#404040', font: { family: 'JetBrains Mono', size: 9 }, stepSize: 20 }, grid: { color: 'rgba(255,255,255,0.04)' } }
+      }
+    }
+  });
+}
+
+// ── RENDER: HEATMAP ───────────────────────────────────────
+const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function renderHeatmap(items) {
+  const counts = new Array(7).fill(0);
+  items.forEach(v => counts[new Date(v.snippet.publishedAt).getDay()]++);
+  const mx = Math.max(...counts, 1);
+
+  // Colour steps: darkest → neon green
+  const steps = ['#0a0a0a','#0b1a0f','#0d2a18','#0f3d22','#12522e','#158040','#00FF88'];
+
+  document.getElementById('heatmap').innerHTML = DAYS.map((d, i) => {
+    const lvl  = Math.round((counts[i] / mx) * 6);
+    const dark = lvl < 4;
+    return `<div class="hm-cell"
+      style="background:${steps[lvl]};color:${dark ? '#404040' : '#000'};"
+      title="${d}: ${counts[i]} upload${counts[i]!==1?'s':''}"
+    >${d.slice(0,2)}<br>${counts[i]}</div>`;
+  }).join('');
+
+  const best = counts.indexOf(Math.max(...counts));
+  const bestEl = document.getElementById('hm-best-day');
+  bestEl.innerHTML = `▸ Best publish day: <span>${DAYS[best]}</span> — ${counts[best]} video${counts[best]!==1?'s':''} found`;
+  // Also update insight strip
+  const insEl = document.getElementById('best-day-ins');
+  if (insEl) insEl.textContent = DAYS[best];
+}
+
+// ── RENDER: RESULT ROWS ───────────────────────────────────
+function renderRows(scored, q) {
+  document.getElementById('result-count').textContent = scored.length + ' videos ranked';
+  document.getElementById('result-rows').innerHTML = scored.map((v, i) => {
+    const s   = v.snippet;
+    const vel = v.vel;
+    const th  = s.thumbnails?.medium?.url || '';
+    return `<div class="result-row" id="row-${i}" onclick="copyTitle(${i})" title="Click to copy title">
+      <div class="result-rank" style="color:${vel.col};">${vel.score}</div>
+      <div class="result-thumb">${th ? `<img src="${th}" loading="lazy" alt="">` : '▶'}</div>
+      <div class="result-body">
+        <div class="result-title">${escHtml(s.title)}</div>
+        <div class="result-meta">
+          <span>${escHtml(s.channelTitle)}</span>
+          <span>📅 ${vel.days}d ago</span>
+          <span>⚡ ~${fmtN(vel.vPerDay)}/day est.</span>
+          <span class="vel-badge" style="${vel.badge}">${vel.label}</span>
+        </div>
+        <div class="vel-bar">
+          <div class="vel-fill" style="width:${vel.score}%;background:${vel.col};opacity:0.55;"></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Animate bars after paint
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.vel-fill').forEach(el => {
+      const w = el.style.width;
+      el.style.width = '0';
+      setTimeout(() => { el.style.width = w; }, 80);
+    });
+  });
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── COPY: SINGLE TITLE ───────────────────────────────────
+function copyTitle(idx) {
+  const title = currentResults[idx]?.snippet?.title;
+  if (!title) return;
+  navigator.clipboard.writeText(title).then(() => {
+    showToast('✓ Title copied to clipboard');
+    const row = document.getElementById('row-' + idx);
+    row.classList.add('copied');
+    setTimeout(() => row.classList.remove('copied'), 1800);
+    // Log
+    try {
+      const events = JSON.parse(localStorage.getItem('nexus_events')||'[]');
+      events.push({ event_type:'copy_title', title, timestamp: new Date().toISOString() });
+      localStorage.setItem('nexus_events', JSON.stringify(events.slice(-200)));
+    } catch(e) {}
+  });
+}
+
+// ── COPY: TOP 5 ──────────────────────────────────────────
+function copyTopTitles() {
+  const top = currentResults.slice(0, 5).map((v,i) => `${i+1}. ${v.snippet.title}`).join('\n');
+  if (!top) { showToast('Run a scan first'); return; }
+  navigator.clipboard.writeText(top).then(() => showToast('✓ Top 5 titles copied'));
+}
+
+// ── RENDER: TAG CLOUD ────────────────────────────────────
+function renderTags(q) {
+  const mods = [
+    ['beginners guide',   'kw-green'],
+    ['tips and tricks',   'kw-green'],
+    ['full tutorial',     'kw-blue'],
+    ['step by step',      'kw-blue'],
+    ['best strategies',   'kw-amber'],
+    ['mistakes to avoid', 'kw-amber'],
+    ['honest review',     'kw-red'],
+    ['vs comparison',     'kw-red'],
+    ['complete guide',    'kw-dim'],
+    ['explained',         'kw-dim'],
+    ['how to start',      'kw-green'],
+    ['worth it in 2025',  'kw-amber'],
+  ];
+  document.getElementById('tag-cloud').innerHTML = mods.map(([m, cls]) =>
+    `<span class="kw-tag ${cls}" onclick="prefillAndScan('${escHtml(q)} ${m}')">${q} ${m}</span>`
+  ).join('');
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+function goTo(page) {
+  const map = {
+    'dashboard':       'nexus-dashboard.html',
+    'viral-velocity':  'nexus-viral-velocity.html',
+    'title-dna':       'nexus-title-dna.html',
+    'niche-map':       'nexus-niche-map.html',
+    'seo-matrix':      'nexus-seo-matrix.html',
+    'live-feed':       'nexus-live-feed.html',
+    'pro':             'nexus-pro.html',
+    'pro-momentum':    'nexus-pro.html',
+    'pro-gap':         'nexus-pro.html',
+    'pro-weak':        'nexus-pro.html',
+    'pro-firstmover':  'nexus-pro.html',
+    'terms':           'nexus-terms.html',
+    'privacy':         'nexus-privacy.html',
+    'admin':           'nexus-admin.html',
+  };
+  // Log
+  try {
+    const email  = localStorage.getItem('nexus_email') || '';
+    const events = JSON.parse(localStorage.getItem('nexus_events')||'[]');
+    events.push({ gmail:email, event_type:'navigate', to:page, timestamp:new Date().toISOString() });
+    if (events.length > 200) events.splice(0, events.length - 200);
+    localStorage.setItem('nexus_events', JSON.stringify(events));
+    gtag('event','page_navigate',{to:page});
+  } catch(e) {}
+  const dest = map[page];
+  if (dest) window.location.href = dest;
+  else showToast('Page coming soon — building now');
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────
+function toggleSidebar() {
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+    document.getElementById('sb-overlay').style.display =
+      document.getElementById('sidebar').classList.contains('mobile-open') ? 'block' : 'none';
+  } else {
+    sidebarCollapsed = !sidebarCollapsed;
+    document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+    document.getElementById('main').classList.toggle('collapsed', sidebarCollapsed);
+  }
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sb-overlay').style.display = 'none';
+}
+
+// ── THEME ─────────────────────────────────────────────────
+let dark = true;
+function toggleTheme() {
+  dark = !dark;
+  document.body.style.background = dark ? 'var(--off)' : '#F5F5F5';
+  document.body.style.color = dark ? 'var(--white)' : '#111';
+  document.getElementById('theme-btn').textContent = dark ? '🌙' : '☀️';
+}
+
+// ── SETTINGS ──────────────────────────────────────────────
+function showSettings() {
+  const did = getDeviceId();
+  showToast(`Device: ${did.slice(0,18)}… · ${isPro ? 'PRO Active' : 'Free Plan'}`);
+}
+
+// ── CMD PALETTE ───────────────────────────────────────────
+const CMD = [
+  {ico:'⊞',name:'Dashboard',       sub:'Main hub',                        go:'dashboard'},
+  {ico:'⚡',name:'Viral Velocity',  sub:'Score keywords 0–100',            go:'viral-velocity'},
+  {ico:'🧬',name:'Title DNA',       sub:'Extract power words + titles',    go:'title-dna'},
+  {ico:'🗺',name:'Niche Map',       sub:'Saturation analysis',             go:'niche-map'},
+  {ico:'📊',name:'SEO Matrix',      sub:'7-dimension title scoring',       go:'seo-matrix'},
+  {ico:'📡',name:'Live Feed',       sub:'Real-time YouTube trending',      go:'live-feed'},
+  {ico:'✦', name:'Upgrade PRO',     sub:'₦3,000/month — 4 extra tools',   go:'pro'},
+  {ico:'📈',name:'Trend Momentum',  sub:'PRO — Rising or falling?',        go:'pro'},
+  {ico:'🔍',name:'Gap Finder',      sub:'PRO — Find uncovered topics',     go:'pro'},
+  {ico:'⚔', name:'Weakness Report', sub:'PRO — Attack vectors',            go:'pro'},
+  {ico:'★', name:'First Mover',     sub:'PRO — Zero competition alerts',   go:'pro'},
+];
+let cmdFilt = CMD, cmdSel = 0;
+
+function openCmd() {
+  document.getElementById('cmd-overlay').classList.add('open');
+  document.getElementById('cmd-input').value = '';
+  cmdFilt = CMD; cmdSel = 0; renderCmd();
+  setTimeout(() => document.getElementById('cmd-input').focus(), 50);
+}
+function closeCmd()     { document.getElementById('cmd-overlay').classList.remove('open'); }
+function filterCmd(v)   { cmdFilt = CMD.filter(c => c.name.toLowerCase().includes(v.toLowerCase()) || c.sub.toLowerCase().includes(v.toLowerCase())); cmdSel = 0; renderCmd(); }
+function renderCmd()    {
+  document.getElementById('cmd-list').innerHTML = cmdFilt.map((c,i) => `
+    <div class="cmd-item${i===cmdSel?' hi':''}" onclick="goTo('${c.go}');closeCmd()">
+      <div class="cmd-ico">${c.ico}</div>
+      <div><div class="cmd-name">${c.name}</div><div class="cmd-sub">${c.sub}</div></div>
+    </div>`).join('');
+}
+function cmdNav(e) {
+  if (e.key==='ArrowDown') { cmdSel=Math.min(cmdSel+1,cmdFilt.length-1); renderCmd(); }
+  else if (e.key==='ArrowUp') { cmdSel=Math.max(cmdSel-1,0); renderCmd(); }
+  else if (e.key==='Enter' && cmdFilt[cmdSel]) { goTo(cmdFilt[cmdSel].go); closeCmd(); }
+  else if (e.key==='Escape') closeCmd();
+}
+document.addEventListener('keydown', e => {
+  if ((e.metaKey||e.ctrlKey) && e.key==='k') { e.preventDefault(); openCmd(); }
+  if (e.key==='Escape') closeCmd();
+});
+
+// Init CMD list
+renderCmd();
+</script>
+</body>
+</html>
