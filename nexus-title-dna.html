@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Title DNA — NEXUS v2</title>
+
+<!-- GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7PMXBZF9PL"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-7PMXBZF9PL');</script>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ─── TOKENS (exact match to suite) ─── */
+:root {
+  --black:    #000000;
+  --off:      #0A0A0A;
+  --s1:       #0F0F0F;
+  --s2:       #141414;
+  --s3:       #1A1A1A;
+  --s4:       #202020;
+  --line:     rgba(255,255,255,0.06);
+  --line-g:   rgba(0,255,136,0.18);
+  --line-a:   rgba(245,166,35,0.2);
+  --g1:       #00FF88;
+  --g2:       #00CC6A;
+  --amber:    #F5A623;
+  --red:      #FF4455;
+  --blue:     #4F8EF7;
+  --purple:   #9B6DFF;
+  --white:    #F0F0F0;
+  --muted:    #707070;
+  --dim:      #404040;
+  --font-d:   'Bebas Neue', sans-serif;
+  --font-b:   'DM Sans', sans-serif;
+  --font-m:   'JetBrains Mono', monospace;
+  --r:        10px;
+  --r-sm:     7px;
+  --tr:       all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ─── RESET ─── */
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { height:100%; }
+body {
+  font-family: var(--font-b);
+  background: var(--off);
+  color: var(--white);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection { background: rgba(0,255,136,0.18); color: var(--g1); }
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font-b); cursor: pointer; border: none; background: none; outline: none; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--s1); }
+::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+
+/* ─── HEADER ─── */
+#header {
+  position: fixed; top:0; left:0; right:0;
+  z-index: 900; height: 56px;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center;
+  padding: 0 20px;
+  justify-content: space-between; gap: 12px;
+}
+#header::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,0.15) 30%,rgba(0,255,136,0.15) 70%,transparent);
+}
+.hdr-left { display:flex; align-items:center; gap:12px; }
+.hdr-right { display:flex; align-items:center; gap:10px; }
+.menu-btn {
+  width:36px; height:36px; border-radius:var(--r-sm);
+  border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--muted); transition:var(--tr); flex-shrink:0;
+}
+.menu-btn:hover { border-color:var(--line-g); color:var(--g1); }
+.menu-btn svg { width:16px; height:16px; }
+.logo { display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; }
+.logo-hex {
+  width:30px; height:30px; border:1.5px solid var(--g1); border-radius:7px;
+  transform:rotate(45deg); display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 16px rgba(0,255,136,0.2);
+  animation:hexPulse 3s ease-in-out infinite; flex-shrink:0;
+}
+.logo-hex span { transform:rotate(-45deg); font-family:var(--font-d); font-size:0.875rem; color:var(--g1); display:block; }
+@keyframes hexPulse { 0%,100%{box-shadow:0 0 12px rgba(0,255,136,0.15);} 50%{box-shadow:0 0 28px rgba(0,255,136,0.4);} }
+.logo-name { font-family:var(--font-d); font-size:1.125rem; letter-spacing:0.18em; color:var(--white); }
+.logo-name em { color:var(--g1); font-style:normal; }
+.live-badge {
+  display:flex; align-items:center; gap:5px;
+  font-family:var(--font-m); font-size:0.5625rem;
+  letter-spacing:0.12em; color:var(--red);
+  background:rgba(255,68,85,0.08); border:1px solid rgba(255,68,85,0.2);
+  padding:3px 9px; border-radius:100px;
+}
+.live-dot { width:5px; height:5px; border-radius:50%; background:var(--red); box-shadow:0 0 6px var(--red); animation:blink 1.5s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.online-pill { display:flex; align-items:center; gap:5px; font-family:var(--font-m); font-size:0.5625rem; letter-spacing:0.1em; color:var(--g1); }
+.online-dot { width:5px; height:5px; border-radius:50%; background:var(--g1); box-shadow:0 0 6px var(--g1); animation:blink 2s ease-in-out infinite; }
+.hdr-btn {
+  padding:7px 14px; border-radius:var(--r-sm);
+  font-family:var(--font-m); font-size:0.5625rem;
+  letter-spacing:0.12em; font-weight:700;
+  text-transform:uppercase; transition:var(--tr);
+}
+.hdr-btn-free { border:1px solid var(--line); color:var(--muted); }
+.hdr-btn-free:hover { border-color:var(--line-g); color:var(--g1); }
+.hdr-btn-pro { background:linear-gradient(135deg,var(--amber),#d48800); color:#000; box-shadow:0 0 16px rgba(245,166,35,0.25); animation:proPulse 2.5s ease-in-out infinite; }
+@keyframes proPulse { 0%,100%{box-shadow:0 0 10px rgba(245,166,35,0.2);}50%{box-shadow:0 0 24px rgba(245,166,35,0.5);} }
+.theme-btn { width:36px; height:36px; border-radius:var(--r-sm); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:1rem; transition:var(--tr); color:var(--muted); }
+.theme-btn:hover { border-color:var(--line-g); }
+
+/* ─── LAYOUT ─── */
+.app-wrap { display:flex; padding-top:56px; min-height:100vh; }
+
+/* ─── SIDEBAR ─── */
+#sidebar {
+  width:224px; flex-shrink:0; background:var(--s1); border-right:1px solid var(--line);
+  position:fixed; top:56px; left:0; bottom:0;
+  overflow-y:auto; overflow-x:hidden;
+  display:flex; flex-direction:column;
+  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1), width 0.3s cubic-bezier(0.4,0,0.2,1);
+  z-index:800;
+}
+#sidebar.collapsed { width:56px; }
+#sidebar.collapsed .nav-label, #sidebar.collapsed .nav-text,
+#sidebar.collapsed .nav-badge, #sidebar.collapsed .sb-pro { display:none; }
+#sidebar.collapsed .nav-item { justify-content:center; padding:11px; }
+@media(max-width:768px){
+  #sidebar { transform:translateX(-100%); width:224px !important; }
+  #sidebar.mobile-open { transform:translateX(0); }
+  #sb-overlay { display:block; }
+  .main-content { margin-left:0 !important; }
+}
+#sb-overlay { display:none; position:fixed; inset:0; z-index:799; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); }
+.sb-section { padding:16px 10px 6px; }
+.nav-label { font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--dim); padding:0 6px; margin-bottom:5px; white-space:nowrap; }
+.nav-item {
+  display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; border-radius:var(--r-sm);
+  font-size:0.875rem; font-weight:500; color:var(--muted);
+  cursor:pointer; transition:var(--tr); white-space:nowrap;
+  border:none; background:none; text-align:left; position:relative;
+}
+.nav-item:hover { background:var(--s3); color:var(--white); }
+.nav-item.active { background:rgba(0,255,136,0.07); color:var(--g1); }
+.nav-item.active::before {
+  content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:2px; height:18px; background:var(--g1); border-radius:0 2px 2px 0;
+}
+.nav-icon { font-size:1rem; width:18px; text-align:center; flex-shrink:0; }
+.nav-text { flex:1; }
+.nav-badge { font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.08em; padding:2px 6px; border-radius:4px; background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.2); color:var(--amber); }
+.sb-pro {
+  margin:auto 10px 14px;
+  background:linear-gradient(135deg,rgba(245,166,35,0.08),rgba(245,166,35,0.03));
+  border:1px solid var(--line-a); border-radius:var(--r);
+  padding:14px; cursor:pointer; transition:var(--tr);
+}
+.sb-pro:hover { border-color:rgba(245,166,35,0.35); }
+.sb-pro-title { font-weight:600; font-size:0.875rem; color:var(--amber); margin-bottom:4px; }
+.sb-pro-sub { font-size:0.75rem; color:var(--muted); line-height:1.5; margin-bottom:10px; }
+.sb-pro-btn { width:100%; padding:8px; background:linear-gradient(135deg,var(--amber),#d48800); color:#000; font-weight:700; font-size:0.8125rem; border-radius:var(--r-sm); text-align:center; transition:var(--tr); }
+.sb-pro-btn:hover { box-shadow:0 4px 16px rgba(245,166,35,0.35); }
+
+/* ─── MAIN CONTENT ─── */
+.main-content {
+  flex:1; margin-left:224px; min-width:0;
+  padding:28px 28px 80px;
+  transition:margin-left 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.main-content.collapsed { margin-left:56px; }
+@media(max-width:768px){ .main-content { margin-left:0 !important; padding:16px 16px 100px; } }
+
+/* ─── PAGE HEADER ─── */
+.page-hdr {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:16px; flex-wrap:wrap; margin-bottom:24px;
+  animation:fadeDown 0.4s ease both;
+}
+.page-hdr-left { min-width:0; }
+.breadcrumb {
+  display:flex; align-items:center; gap:6px;
+  font-family:var(--font-m); font-size:0.5625rem;
+  color:var(--dim); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px;
+}
+.breadcrumb a { color:var(--dim); cursor:pointer; transition:color 0.2s; }
+.breadcrumb a:hover { color:var(--g1); }
+.breadcrumb .sep { color:var(--dim); }
+.page-title { font-family:var(--font-d); font-size:clamp(1.75rem,3.5vw,2.5rem); letter-spacing:0.04em; line-height:1.0; color:var(--white); }
+.page-title .accent { color:var(--g1); }
+.page-sub { font-size:0.9375rem; color:var(--muted); line-height:1.6; margin-top:6px; max-width:520px; }
+.page-hdr-right { display:flex; align-items:center; gap:8px; flex-shrink:0; padding-top:4px; }
+
+/* ─── SEARCH CARD ─── */
+.search-card {
+  background:var(--s2); border:1px solid var(--line-g);
+  border-radius:var(--r); padding:20px; margin-bottom:20px;
+  position:relative; overflow:hidden; animation:fadeDown 0.4s ease 0.05s both;
+}
+.search-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,var(--g1) 40%,var(--g2) 60%,transparent); opacity:0.4;
+}
+.search-label {
+  font-family:var(--font-m); font-size:0.5rem;
+  letter-spacing:0.2em; text-transform:uppercase; color:var(--dim); margin-bottom:10px;
+  display:flex; align-items:center; gap:8px;
+}
+.search-label::after { content:''; flex:1; height:1px; background:var(--line); }
+.search-row { display:flex; gap:8px; flex-wrap:wrap; }
+.search-input {
+  flex:1; min-width:200px;
+  background:var(--s3); border:1px solid var(--line);
+  border-radius:var(--r-sm); padding:12px 16px;
+  font-family:var(--font-b); font-size:0.9375rem; color:var(--white);
+  outline:none; transition:var(--tr);
+}
+.search-input::placeholder { color:var(--dim); }
+.search-input:focus { border-color:var(--line-g); box-shadow:0 0 0 3px rgba(0,255,136,0.06); }
+.search-input.has-value { border-color:rgba(0,255,136,0.2); }
+.search-select {
+  background:var(--s3); border:1px solid var(--line); border-radius:var(--r-sm);
+  padding:12px 14px; font-family:var(--font-m); font-size:0.6875rem;
+  color:var(--muted); outline:none; transition:var(--tr); cursor:pointer; min-width:140px;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23404040' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 12px center; padding-right:32px;
+}
+.search-select:focus { border-color:var(--line-g); color:var(--g1); }
+.search-select option { background:var(--s2); }
+.btn-scan {
+  padding:12px 24px; background:linear-gradient(135deg,var(--g1),var(--g2));
+  color:#000; font-family:var(--font-d); font-size:1rem; letter-spacing:0.08em;
+  border-radius:var(--r-sm); border:none; cursor:pointer; transition:var(--tr);
+  white-space:nowrap; display:flex; align-items:center; gap:8px; flex-shrink:0;
+}
+.btn-scan:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,255,136,0.35); }
+.btn-scan:active { transform:translateY(0); }
+.btn-scan.loading { opacity:0.7; pointer-events:none; }
+.btn-scan .spin { animation:spin 1s linear infinite; display:none; }
+.btn-scan.loading .spin { display:inline-block; }
+.btn-scan.loading .scan-icon { display:none; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.recent-wrap { margin-top:12px; }
+.recent-label { font-family:var(--font-m); font-size:0.5rem; color:var(--dim); letter-spacing:0.15em; text-transform:uppercase; margin-bottom:7px; }
+.recent-pills { display:flex; flex-wrap:wrap; gap:6px; }
+.recent-pill {
+  font-family:var(--font-m); font-size:0.6875rem; padding:4px 12px; border-radius:100px;
+  background:var(--s3); border:1px solid var(--line); color:var(--muted);
+  cursor:pointer; transition:var(--tr); display:flex; align-items:center; gap:5px;
+}
+.recent-pill:hover { border-color:var(--line-g); color:var(--g1); }
+
+/* ─── LOADER ─── */
+#loader-wrap { display:none; padding:10px 0 20px; animation:fadeDown 0.3s ease; }
+#loader-wrap.active { display:block; }
+.loader-bar-outer { height:2px; background:var(--s4); border-radius:2px; overflow:hidden; margin-bottom:12px; }
+.loader-bar-inner {
+  height:100%; background:linear-gradient(90deg,var(--g2),var(--g1),var(--g2));
+  background-size:200% 100%; animation:shimmer 1.4s ease-in-out infinite; border-radius:2px; width:100%;
+}
+@keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+.loader-steps { display:flex; gap:8px; flex-wrap:wrap; }
+.loader-step { font-family:var(--font-m); font-size:0.5625rem; letter-spacing:0.1em; color:var(--dim); display:flex; align-items:center; gap:5px; transition:color 0.3s; }
+.loader-step.active { color:var(--g1); }
+.loader-step.done { color:var(--muted); }
+.loader-step .dot { width:5px; height:5px; border-radius:50%; background:var(--dim); transition:background 0.3s; }
+.loader-step.active .dot { background:var(--g1); box-shadow:0 0 8px var(--g1); animation:blink 1s ease-in-out infinite; }
+.loader-step.done .dot { background:var(--g2); }
+
+/* ─── STATS ROW ─── */
+#stats-row {
+  display:none; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px; margin-bottom:20px; animation:fadeDown 0.4s ease both;
+}
+#stats-row.active { display:grid; }
+.stat-card {
+  background:var(--s2); border:1px solid var(--line);
+  border-radius:var(--r); padding:14px 16px;
+  position:relative; overflow:hidden; transition:var(--tr);
+}
+.stat-card:hover { border-color:var(--line-g); }
+.stat-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,0.2),transparent);
+}
+.stat-label { font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--dim); margin-bottom:6px; }
+.stat-value { font-family:var(--font-d); font-size:1.625rem; letter-spacing:0.02em; color:var(--white); line-height:1; }
+.stat-sub { font-size:0.6875rem; color:var(--muted); margin-top:4px; }
+.stat-value.green { color:var(--g1); }
+.stat-value.amber { color:var(--amber); }
+.stat-value.blue  { color:var(--blue); }
+.stat-value.purple{ color:var(--purple); }
+
+/* ─── TWO-COL LAYOUT ─── */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+@media(max-width:860px){ .two-col { grid-template-columns:1fr; } }
+.three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:20px; }
+@media(max-width:960px){ .three-col { grid-template-columns:1fr 1fr; } }
+@media(max-width:560px){ .three-col { grid-template-columns:1fr; } }
+
+/* ─── PANEL CARD ─── */
+.panel {
+  background:var(--s2); border:1px solid var(--line);
+  border-radius:var(--r); padding:18px; position:relative; overflow:hidden;
+  animation:fadeUp 0.4s ease both;
+}
+.panel::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,0.15),transparent);
+}
+.panel-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:14px; gap:10px;
+}
+.panel-title {
+  font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.2em;
+  text-transform:uppercase; color:var(--dim);
+  display:flex; align-items:center; gap:8px;
+}
+.panel-title-ico { font-size:0.875rem; }
+.panel-action {
+  font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.1em;
+  color:var(--g1); cursor:pointer; border:none; background:none;
+  padding:4px 10px; border-radius:4px; border:1px solid var(--line-g);
+  transition:var(--tr);
+}
+.panel-action:hover { background:rgba(0,255,136,0.06); }
+
+/* ─── POWER WORDS ─── */
+.word-cloud { display:flex; flex-wrap:wrap; gap:8px; }
+.word-chip {
+  font-family:var(--font-m); font-size:0.6875rem; padding:5px 13px;
+  border-radius:100px; cursor:pointer; transition:var(--tr);
+  letter-spacing:0.04em; user-select:none;
+}
+.word-chip:hover { transform:translateY(-2px); }
+.word-chip.wc-green  { background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); color:var(--g1); }
+.word-chip.wc-amber  { background:rgba(245,166,35,0.08); border:1px solid rgba(245,166,35,0.2); color:var(--amber); }
+.word-chip.wc-blue   { background:rgba(79,142,247,0.08); border:1px solid rgba(79,142,247,0.2); color:var(--blue); }
+.word-chip.wc-purple { background:rgba(155,109,255,0.08); border:1px solid rgba(155,109,255,0.2); color:var(--purple); }
+.word-chip.wc-red    { background:rgba(255,68,85,0.08); border:1px solid rgba(255,68,85,0.2); color:var(--red); }
+.word-chip.wc-dim    { background:var(--s3); border:1px solid var(--line); color:var(--muted); }
+
+/* ─── STRUCTURE CHART (DNA Visual) ─── */
+.dna-wrap { display:flex; flex-direction:column; gap:6px; }
+.dna-row { display:flex; align-items:center; gap:10px; }
+.dna-label { font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.12em; color:var(--dim); width:90px; flex-shrink:0; text-transform:uppercase; }
+.dna-bar-outer { flex:1; height:6px; background:var(--s4); border-radius:3px; overflow:hidden; }
+.dna-bar-inner { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); width:0; }
+.dna-val { font-family:var(--font-m); font-size:0.6875rem; color:var(--white); width:34px; text-align:right; flex-shrink:0; }
+
+/* ─── FORMULA TEMPLATES ─── */
+.formula-list { display:flex; flex-direction:column; gap:8px; }
+.formula-item {
+  background:var(--s3); border:1px solid var(--line);
+  border-radius:var(--r-sm); padding:12px 14px;
+  cursor:pointer; transition:var(--tr); position:relative; overflow:hidden;
+}
+.formula-item:hover { border-color:var(--line-g); transform:translateX(3px); }
+.formula-item.copied { border-color:var(--g1); background:rgba(0,255,136,0.04); }
+.formula-template {
+  font-family:var(--font-m); font-size:0.6875rem; color:var(--g1);
+  letter-spacing:0.04em; margin-bottom:5px;
+}
+.formula-example { font-size:0.8125rem; color:var(--white); margin-bottom:5px; line-height:1.5; }
+.formula-meta { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.formula-tag {
+  font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.1em;
+  padding:2px 8px; border-radius:3px;
+}
+.formula-tag.tag-green { background:rgba(0,255,136,0.08); color:var(--g1); }
+.formula-tag.tag-amber { background:rgba(245,166,35,0.08); color:var(--amber); }
+.formula-tag.tag-blue  { background:rgba(79,142,247,0.08); color:var(--blue); }
+.formula-copy-hint { margin-left:auto; font-family:var(--font-m); font-size:0.5rem; color:var(--dim); letter-spacing:0.1em; }
+
+/* ─── TITLE GENERATOR ─── */
+.gen-area {
+  background:var(--s3); border:1px solid var(--line);
+  border-radius:var(--r-sm); padding:14px;
+  margin-bottom:12px; min-height:80px;
+}
+.gen-title-row {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:10px 0; border-bottom:1px solid var(--line);
+  cursor:pointer; transition:var(--tr);
+}
+.gen-title-row:last-child { border-bottom:none; }
+.gen-title-row:hover { padding-left:4px; }
+.gen-title-row:hover .gen-title-text { color:var(--white); }
+.gen-num { font-family:var(--font-m); font-size:0.5625rem; color:var(--dim); padding-top:3px; width:18px; flex-shrink:0; }
+.gen-title-text { font-size:0.9375rem; color:var(--muted); line-height:1.5; transition:color 0.2s; flex:1; }
+.gen-title-text .hl-word { color:var(--g1); }
+.gen-copy-btn {
+  font-size:0.75rem; padding:3px 8px; border-radius:4px;
+  border:1px solid var(--line); color:var(--dim);
+  background:none; cursor:pointer; transition:var(--tr); flex-shrink:0; margin-top:1px;
+}
+.gen-copy-btn:hover { border-color:var(--line-g); color:var(--g1); }
+
+/* ─── TOP PATTERNS TABLE ─── */
+.pattern-list { display:flex; flex-direction:column; gap:6px; }
+.pattern-row {
+  display:flex; align-items:center; gap:12px;
+  background:var(--s3); border:1px solid var(--line);
+  border-radius:var(--r-sm); padding:11px 14px; transition:var(--tr);
+}
+.pattern-row:hover { border-color:var(--line-g); }
+.pattern-rank { font-family:var(--font-d); font-size:1.25rem; color:var(--dim); width:24px; flex-shrink:0; }
+.pattern-body { flex:1; min-width:0; }
+.pattern-name { font-size:0.875rem; font-weight:500; color:var(--white); margin-bottom:2px; }
+.pattern-desc { font-size:0.75rem; color:var(--muted); }
+.pattern-pct {
+  font-family:var(--font-m); font-size:0.6875rem; font-weight:700;
+  padding:3px 10px; border-radius:5px;
+  background:rgba(0,255,136,0.07); border:1px solid rgba(0,255,136,0.12); color:var(--g1);
+}
+
+/* ─── INSIGHT STRIP ─── */
+.insight-strip {
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  background:linear-gradient(90deg,rgba(0,255,136,0.04),rgba(0,255,136,0.01));
+  border:1px solid var(--line-g); border-radius:var(--r);
+  padding:14px 18px; margin-bottom:20px; animation:fadeDown 0.5s ease 0.1s both;
+}
+.insight-ico { font-size:1.25rem; flex-shrink:0; }
+.insight-text { flex:1; font-size:0.875rem; color:var(--muted); line-height:1.6; }
+.insight-text strong { color:var(--g1); font-weight:600; }
+
+/* ─── EMPTY STATE ─── */
+#empty-state {
+  text-align:center; padding:60px 20px;
+  animation:fadeDown 0.5s ease both;
+}
+.empty-dna {
+  font-size:4rem; margin-bottom:20px;
+  display:block;
+  animation:dnaFloat 3s ease-in-out infinite;
+}
+@keyframes dnaFloat { 0%,100%{transform:translateY(0) rotate(-5deg);} 50%{transform:translateY(-10px) rotate(5deg);} }
+#empty-state h3 { font-family:var(--font-d); font-size:1.75rem; color:var(--white); letter-spacing:0.04em; margin-bottom:8px; }
+#empty-state p { font-size:0.9375rem; color:var(--muted); max-width:380px; margin:0 auto 24px; line-height:1.7; }
+.empty-examples { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+.empty-chip {
+  font-family:var(--font-m); font-size:0.6875rem; padding:6px 16px;
+  background:var(--s3); border:1px solid var(--line); border-radius:100px;
+  color:var(--muted); cursor:pointer; transition:var(--tr);
+}
+.empty-chip:hover { border-color:var(--line-g); color:var(--g1); }
+
+/* ─── RESULTS WRAP ─── */
+#results-wrap { display:none; }
+#results-wrap.active { display:block; }
+
+/* ─── COPY ALL BTN ─── */
+.copy-all-btn {
+  display:flex; align-items:center; gap:7px;
+  padding:9px 18px; border-radius:var(--r-sm);
+  border:1px solid var(--line-g); color:var(--g1);
+  background:rgba(0,255,136,0.04); font-family:var(--font-m);
+  font-size:0.5rem; letter-spacing:0.12em; cursor:pointer; transition:var(--tr);
+}
+.copy-all-btn:hover { background:rgba(0,255,136,0.1); }
+
+/* ─── BOTTOM NAV (mobile) ─── */
+.bottom-nav {
+  display:none; position:fixed; bottom:0; left:0; right:0;
+  background:rgba(10,10,10,0.96); backdrop-filter:blur(16px);
+  border-top:1px solid var(--line); z-index:700;
+  padding:8px 0 env(safe-area-inset-bottom,0);
+}
+@media(max-width:768px){ .bottom-nav { display:flex; } }
+.bn-item {
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:3px;
+  font-family:var(--font-m); font-size:0.4375rem; letter-spacing:0.1em;
+  color:var(--dim); cursor:pointer; transition:0.2s; border:none; background:none;
+}
+.bn-item.active { color:var(--g1); }
+.bn-icon { font-size:1.25rem; }
+
+/* ─── TOAST ─── */
+#toast {
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--s2); border:1px solid var(--line-g);
+  color:var(--white); font-size:0.875rem;
+  padding:12px 22px; border-radius:var(--r-sm);
+  z-index:9999; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);
+  white-space:nowrap; pointer-events:none;
+}
+#toast.show { transform:translateX(-50%) translateY(0); }
+
+/* ─── CMD PALETTE ─── */
+#cmd-overlay {
+  position:fixed; inset:0; z-index:9000;
+  background:rgba(0,0,0,0.75); backdrop-filter:blur(10px);
+  display:none; align-items:flex-start; justify-content:center; padding-top:12vh;
+}
+#cmd-overlay.open { display:flex; }
+#cmd-box {
+  background:var(--s2); border:1px solid var(--line-g);
+  border-radius:var(--r); width:100%; max-width:540px; overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,0.6); animation:fadeDown 0.2s ease;
+}
+#cmd-input {
+  width:100%; background:transparent; border:none; color:var(--white);
+  font-family:var(--font-b); font-size:1rem; padding:18px 20px;
+  border-bottom:1px solid var(--line); outline:none;
+}
+#cmd-input::placeholder { color:var(--dim); }
+.cmd-item { display:flex; align-items:center; gap:12px; padding:11px 20px; cursor:pointer; transition:0.15s; }
+.cmd-item:hover,.cmd-item.hi { background:rgba(0,255,136,0.06); }
+.cmd-item.hi .cmd-name { color:var(--g1); }
+.cmd-ico { width:30px; height:30px; border-radius:7px; background:var(--s3); display:flex; align-items:center; justify-content:center; font-size:0.875rem; }
+.cmd-name { font-size:0.9375rem; font-weight:500; color:var(--white); }
+.cmd-sub { font-size:0.75rem; color:var(--muted); margin-top:1px; }
+.cmd-hint { padding:9px 20px; border-top:1px solid var(--line); font-family:var(--font-m); font-size:0.5625rem; color:var(--dim); letter-spacing:0.1em; }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeDown { from{opacity:0;transform:translateY(-12px);} to{opacity:1;transform:translateY(0);} }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(14px);}  to{opacity:1;transform:translateY(0);} }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- CMD Overlay -->
+<div id="cmd-overlay" onclick="if(event.target===this)closeCmd()">
+  <div id="cmd-box">
+    <input id="cmd-input" type="text" placeholder="Search tools… ⌘K" oninput="filterCmd(this.value)" onkeydown="cmdNav(event)" autocomplete="off">
+    <div id="cmd-list"></div>
+    <div class="cmd-hint">↑↓ navigate &nbsp;·&nbsp; Enter to open &nbsp;·&nbsp; Esc to close</div>
+  </div>
+</div>
+
+<!-- Sidebar overlay (mobile) -->
+<div id="sb-overlay" onclick="closeSidebar()"></div>
+
+<!-- ════ HEADER ════ -->
+<header id="header">
+  <div class="hdr-left">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <div class="logo" onclick="goTo('dashboard')">
+      <div class="logo-hex"><span>N</span></div>
+      <div><div class="logo-name">NEXUS <em>v2</em></div></div>
+    </div>
+    <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+  </div>
+  <div class="hdr-right">
+    <div class="online-pill"><span class="online-dot"></span><span id="online-count">312</span>&nbsp;online</div>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">🌙</button>
+    <button class="hdr-btn hdr-btn-free" id="tier-btn" onclick="goTo('pro')">✦ Free</button>
+    <button class="hdr-btn" style="background:rgba(0,255,136,0.07);border:1px solid var(--line-g);color:var(--g1);font-family:var(--font-m);font-size:0.5rem;letter-spacing:0.1em;" onclick="openCmd()" title="⌘K">⌘K</button>
+  </div>
+</header>
+
+<!-- ════ APP ════ -->
+<div class="app-wrap">
+
+  <!-- ════ SIDEBAR ════ -->
+  <nav id="sidebar">
+    <div class="sb-section">
+      <div class="nav-label">Main</div>
+      <button class="nav-item" onclick="goTo('dashboard')">
+        <span class="nav-icon">⊞</span><span class="nav-text">Dashboard</span>
+      </button>
+    </div>
+    <div class="sb-section">
+      <div class="nav-label">Free Tools</div>
+      <button class="nav-item" onclick="goTo('viral-velocity')">
+        <span class="nav-icon">⚡</span><span class="nav-text">Viral Velocity</span>
+      </button>
+      <button class="nav-item active" id="nav-dna">
+        <span class="nav-icon">🧬</span><span class="nav-text">Title DNA</span>
+      </button>
+      <button class="nav-item" onclick="goTo('niche-map')">
+        <span class="nav-icon">🗺</span><span class="nav-text">Niche Map</span>
+      </button>
+      <button class="nav-item" onclick="goTo('seo-matrix')">
+        <span class="nav-icon">📊</span><span class="nav-text">SEO Matrix</span>
+      </button>
+      <button class="nav-item" onclick="goTo('live-feed')">
+        <span class="nav-icon">📡</span><span class="nav-text">Live Feed</span>
+      </button>
+    </div>
+    <div class="sb-section">
+      <div class="nav-label">PRO Tools</div>
+      <button class="nav-item" onclick="goTo('pro-momentum')">
+        <span class="nav-icon">📈</span><span class="nav-text">Trend Momentum</span>
+        <span class="nav-badge">PRO</span>
+      </button>
+      <button class="nav-item" onclick="goTo('pro-gap')">
+        <span class="nav-icon">🔍</span><span class="nav-text">Gap Finder</span>
+        <span class="nav-badge">PRO</span>
+      </button>
+      <button class="nav-item" onclick="goTo('pro-weak')">
+        <span class="nav-icon">⚔</span><span class="nav-text">Weakness Report</span>
+        <span class="nav-badge">PRO</span>
+      </button>
+      <button class="nav-item" onclick="goTo('pro-firstmover')">
+        <span class="nav-icon">★</span><span class="nav-text">First Mover</span>
+        <span class="nav-badge">PRO</span>
+      </button>
+    </div>
+    <div class="sb-section">
+      <div class="nav-label">Account</div>
+      <button class="nav-item" onclick="goTo('pro')">
+        <span class="nav-icon">✦</span><span class="nav-text">Upgrade to PRO</span>
+      </button>
+      <button class="nav-item" onclick="showSettings()">
+        <span class="nav-icon">⚙</span><span class="nav-text">Settings</span>
+      </button>
+      <button class="nav-item" onclick="window.open('https://wa.me/2349076223484','_blank')">
+        <span class="nav-icon">💬</span><span class="nav-text">Support</span>
+      </button>
+    </div>
+    <div class="sb-pro" onclick="goTo('pro')">
+      <div class="sb-pro-title">✦ Unlock PRO</div>
+      <div class="sb-pro-sub">Trend Momentum, Gap Finder, Weakness Report + First Mover Alert</div>
+      <div class="sb-pro-btn">Activate Now →</div>
+    </div>
+  </nav>
+
+  <!-- ════ MAIN ════ -->
+  <main class="main-content" id="main">
+
+    <!-- Page header -->
+    <div class="page-hdr">
+      <div class="page-hdr-left">
+        <div class="breadcrumb">
+          <a onclick="goTo('dashboard')">Dashboard</a>
+          <span class="sep">/</span>
+          <span>Title DNA</span>
+        </div>
+        <div class="page-title">TITLE <span class="accent">DNA</span></div>
+        <div class="page-sub">Decode the genetic blueprint of high-performing titles. Extract power words, structural patterns, and generate proven formulas for your niche.</div>
+      </div>
+      <div class="page-hdr-right">
+        <div style="font-family:var(--font-m);font-size:0.5rem;letter-spacing:0.12em;color:var(--dim);text-align:right;">
+          TITLES ANALYSED<br>
+          <span style="font-family:var(--font-d);font-size:1.25rem;color:var(--g1);" id="analyse-count">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search card -->
+    <div class="search-card">
+      <div class="search-label">Niche or Topic</div>
+      <div class="search-row">
+        <input
+          type="text"
+          id="dna-q"
+          class="search-input"
+          placeholder="e.g. forex trading, weight loss, Minecraft tutorial, make money online…"
+          autocomplete="off"
+          oninput="this.classList.toggle('has-value',this.value.length>0)"
+          onkeydown="if(event.key==='Enter')runDNA()"
+        >
+        <select id="dna-type" class="search-select">
+          <option value="all">All Formats</option>
+          <option value="how-to">How-To</option>
+          <option value="listicle">Listicle</option>
+          <option value="challenge">Challenge</option>
+          <option value="review">Review</option>
+          <option value="story">Story / Vlog</option>
+        </select>
+        <button class="btn-scan" id="dna-btn" onclick="runDNA()">
+          <span class="scan-icon">🧬</span>
+          <span class="spin">↻</span>
+          DECODE
+        </button>
+      </div>
+      <div class="recent-wrap" id="recent-wrap" style="display:none;">
+        <div class="recent-label">Recent</div>
+        <div class="recent-pills" id="recent-pills"></div>
+      </div>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader-wrap">
+      <div class="loader-bar-outer"><div class="loader-bar-inner"></div></div>
+      <div class="loader-steps">
+        <div class="loader-step active" id="step-fetch"><span class="dot"></span>FETCHING TITLES</div>
+        <div class="loader-step" id="step-parse"><span class="dot"></span>PARSING STRUCTURE</div>
+        <div class="loader-step" id="step-words"><span class="dot"></span>EXTRACTING POWER WORDS</div>
+        <div class="loader-step" id="step-gen"><span class="dot"></span>GENERATING FORMULAS</div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty-state">
+      <span class="empty-dna">🧬</span>
+      <h3>DECODE ANY NICHE</h3>
+      <p>Enter a topic above to reveal the hidden patterns, power words, and structural formulas that make titles go viral.</p>
+      <div class="empty-examples">
+        <div class="empty-chip" onclick="prefillAndRun('forex trading Nigeria')">forex trading Nigeria</div>
+        <div class="empty-chip" onclick="prefillAndRun('weight loss tips')">weight loss tips</div>
+        <div class="empty-chip" onclick="prefillAndRun('Minecraft survival')">Minecraft survival</div>
+        <div class="empty-chip" onclick="prefillAndRun('passive income 2025')">passive income 2025</div>
+        <div class="empty-chip" onclick="prefillAndRun('iPhone 17 review')">iPhone 17 review</div>
+        <div class="empty-chip" onclick="prefillAndRun('cooking tutorial')">cooking tutorial</div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results-wrap">
+
+      <!-- Insight strip -->
+      <div class="insight-strip" id="insight-strip">
+        <div class="insight-ico">💡</div>
+        <div class="insight-text" id="insight-text">Loading insights…</div>
+      </div>
+
+      <!-- Stats row -->
+      <div id="stats-row" class="active">
+        <div class="stat-card">
+          <div class="stat-label">Titles Scanned</div>
+          <div class="stat-value green" id="stat-titles">—</div>
+          <div class="stat-sub">from YouTube search</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Title Length</div>
+          <div class="stat-value blue" id="stat-length">—</div>
+          <div class="stat-sub">characters · optimal zone</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Power Word Density</div>
+          <div class="stat-value amber" id="stat-density">—</div>
+          <div class="stat-sub">avg per title</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Top Pattern</div>
+          <div class="stat-value purple" id="stat-pattern" style="font-size:1rem;margin-top:4px;">—</div>
+          <div class="stat-sub">dominant structure</div>
+        </div>
+      </div>
+
+      <!-- DNA bars + Power words -->
+      <div class="two-col">
+
+        <!-- DNA Structure panel -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <div class="panel-title"><span class="panel-title-ico">🧬</span>STRUCTURAL DNA</div>
+          </div>
+          <div class="dna-wrap" id="dna-bars"></div>
+        </div>
+
+        <!-- Power words panel -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <div class="panel-title"><span class="panel-title-ico">⚡</span>POWER WORDS</div>
+            <button class="panel-action" onclick="copyPowerWords()">COPY ALL</button>
+          </div>
+          <div class="word-cloud" id="word-cloud"></div>
+        </div>
+
+      </div>
+
+      <!-- Top patterns + Generated titles -->
+      <div class="two-col">
+
+        <!-- Top patterns -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <div class="panel-title"><span class="panel-title-ico">📐</span>TOP TITLE PATTERNS</div>
+          </div>
+          <div class="pattern-list" id="pattern-list"></div>
+        </div>
+
+        <!-- Formula templates -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <div class="panel-title"><span class="panel-title-ico">🔬</span>PROVEN FORMULAS</div>
+            <div style="font-family:var(--font-m);font-size:0.5rem;color:var(--dim);letter-spacing:0.1em;">click to copy</div>
+          </div>
+          <div class="formula-list" id="formula-list"></div>
+        </div>
+
+      </div>
+
+      <!-- Generated title ideas -->
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="panel-hdr">
+          <div class="panel-title"><span class="panel-title-ico">✨</span>GENERATED TITLE IDEAS</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="copy-all-btn" onclick="copyAllTitles()">⎘ COPY ALL 10</button>
+            <button class="panel-action" onclick="regenTitles()">↻ REGENERATE</button>
+          </div>
+        </div>
+        <div class="gen-area" id="gen-area">
+          <div style="color:var(--dim);font-size:0.875rem;padding:10px 0;">Generating title ideas…</div>
+        </div>
+        <div style="font-family:var(--font-m);font-size:0.5rem;color:var(--dim);letter-spacing:0.1em;margin-top:6px;">
+          🧬 Titles built using extracted DNA patterns · Click any title to copy
+        </div>
+      </div>
+
+    </div><!-- /results-wrap -->
+
+  </main>
+</div>
+
+<!-- Bottom nav (mobile) -->
+<nav class="bottom-nav">
+  <button class="bn-item" onclick="goTo('dashboard')"><span class="bn-icon">⊞</span>HOME</button>
+  <button class="bn-item" onclick="goTo('viral-velocity')"><span class="bn-icon">⚡</span>VELOCITY</button>
+  <button class="bn-item bn-item active"><span class="bn-icon">🧬</span>DNA</button>
+  <button class="bn-item" onclick="goTo('niche-map')"><span class="bn-icon">🗺</span>NICHE</button>
+  <button class="bn-item" onclick="goTo('pro')"><span class="bn-icon">✦</span>PRO</button>
+</nav>
+
+<script>
+'use strict';
+
+// ── STATE ─────────────────────────────────────────────────
+const YT_KEY      = 'AIzaSyBU_MOKyBUGBMDH4DFPmFGFVBBfMpGqCd0';
+let currentQuery  = '';
+let currentTitles = [];
+let currentWords  = [];
+let generatedList = [];
+let sidebarCollapsed = false;
+
+// ── DEVICE ID ─────────────────────────────────────────────
+function getDeviceId() {
+  let id = localStorage.getItem('nexus_device');
+  if (!id) { id = 'dev_' + Math.random().toString(36).slice(2, 14); localStorage.setItem('nexus_device', id); }
+  return id;
+}
+
+// ── PRO CHECK ─────────────────────────────────────────────
+const isPro = localStorage.getItem('nexus_pro') === 'true';
+if (isPro) {
+  document.getElementById('tier-btn').textContent = '✦ PRO';
+  document.getElementById('tier-btn').className = 'hdr-btn hdr-btn-pro';
+}
+
+// ── ANALYSE COUNT ─────────────────────────────────────────
+const ANALYSE_KEY = 'nexus_dna_count';
+let analyseCount = parseInt(localStorage.getItem(ANALYSE_KEY) || '0', 10);
+document.getElementById('analyse-count').textContent = analyseCount;
+function bumpCount() { analyseCount++; localStorage.setItem(ANALYSE_KEY, analyseCount); document.getElementById('analyse-count').textContent = analyseCount; }
+
+// ── ONLINE COUNTER ANIMATION ──────────────────────────────
+let oc = 312;
+setInterval(() => {
+  oc += Math.round((Math.random() - 0.48) * 4);
+  oc = Math.max(180, Math.min(600, oc));
+  document.getElementById('online-count').textContent = oc;
+}, 4000);
+
+// ── TOAST ─────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ── RECENT SEARCHES ───────────────────────────────────────
+function loadRecent() {
+  const items = JSON.parse(localStorage.getItem('nexus_dna_recent') || '[]');
+  if (!items.length) return;
+  document.getElementById('recent-wrap').style.display = 'block';
+  document.getElementById('recent-pills').innerHTML = items.slice(0,6).map(q =>
+    `<div class="recent-pill" onclick="prefillAndRun('${escHtml(q)}')">${escHtml(q)}</div>`
+  ).join('');
+}
+function saveRecent(q) {
+  const items = JSON.parse(localStorage.getItem('nexus_dna_recent') || '[]');
+  const filtered = items.filter(x => x !== q);
+  filtered.unshift(q);
+  localStorage.setItem('nexus_dna_recent', JSON.stringify(filtered.slice(0, 10)));
+  loadRecent();
+}
+function prefillAndRun(q) {
+  document.getElementById('dna-q').value = q;
+  document.getElementById('dna-q').classList.add('has-value');
+  runDNA();
+}
+loadRecent();
+
+// ── LOADER STEPS ──────────────────────────────────────────
+const STEPS = ['step-fetch','step-parse','step-words','step-gen'];
+function setStep(i) {
+  STEPS.forEach((id, idx) => {
+    const el = document.getElementById(id);
+    if (idx < i)       el.className = 'loader-step done';
+    else if (idx === i) el.className = 'loader-step active';
+    else               el.className = 'loader-step';
+  });
+}
+
+// ── MAIN: RUN DNA ANALYSIS ────────────────────────────────
+async function runDNA() {
+  const q = document.getElementById('dna-q').value.trim();
+  if (!q) { showToast('Enter a topic first'); return; }
+
+  currentQuery = q;
+  saveRecent(q);
+  bumpCount();
+
+  // Log
+  try {
+    const email  = localStorage.getItem('nexus_email') || '';
+    const events = JSON.parse(localStorage.getItem('nexus_events') || '[]');
+    events.push({ gmail:email, event_type:'title_dna', query:q, timestamp:new Date().toISOString() });
+    if (events.length > 200) events.splice(0, events.length - 200);
+    localStorage.setItem('nexus_events', JSON.stringify(events));
+    gtag('event', 'title_dna_run', { query: q });
+  } catch(e) {}
+
+  // UI: hide empty/results, show loader
+  document.getElementById('empty-state').style.display   = 'none';
+  document.getElementById('results-wrap').classList.remove('active');
+  document.getElementById('loader-wrap').classList.add('active');
+  document.getElementById('dna-btn').classList.add('loading');
+  setStep(0);
+
+  try {
+    // Step 1: fetch titles from YouTube
+    const titles = await fetchTitles(q);
+    setStep(1);
+    await delay(400);
+
+    // Step 2: parse structure
+    const structure = analyseStructure(titles);
+    setStep(2);
+    await delay(400);
+
+    // Step 3: extract power words
+    const words = extractPowerWords(titles, q);
+    currentWords = words;
+    setStep(3);
+    await delay(400);
+
+    // Step 4: generate formulas & titles
+    currentTitles = titles;
+    const formulas  = buildFormulas(q);
+    generatedList   = generateTitles(q, words, formulas);
+    await delay(300);
+
+    // Render everything
+    renderResults(titles, structure, words, formulas);
+  } catch(err) {
+    console.error(err);
+    showToast('⚠ Could not fetch data — showing demo results');
+    renderDemo(q);
+  } finally {
+    document.getElementById('loader-wrap').classList.remove('active');
+    document.getElementById('dna-btn').classList.remove('loading');
+    document.getElementById('results-wrap').classList.add('active');
+  }
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── FETCH TITLES FROM YOUTUBE ─────────────────────────────
+async function fetchTitles(q) {
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${encodeURIComponent(q)}&maxResults=50&order=relevance&key=${YT_KEY}`;
+  const res  = await fetch(url);
+  if (!res.ok) throw new Error('YouTube API error');
+  const data = await res.json();
+  return (data.items || []).map(it => it.snippet?.title || '').filter(Boolean);
+}
+
+// ── ANALYSE STRUCTURE ─────────────────────────────────────
+function analyseStructure(titles) {
+  let numStart=0, howTo=0, bracketEnd=0, question=0, listicle=0, colons=0;
+  const lengths = [];
+
+  titles.forEach(t => {
+    lengths.push(t.length);
+    if (/^\d+\s/i.test(t))              listicle++;
+    if (/^how\s+to\b/i.test(t))         howTo++;
+    if (/\b\d+\b/.test(t))              numStart++;
+    if (/[\[\(].+[\]\)]$/.test(t))      bracketEnd++;
+    if (/\?$/.test(t))                  question++;
+    if (/:/.test(t))                    colons++;
+  });
+
+  const total = titles.length || 1;
+  const avgLen = Math.round(lengths.reduce((a,b)=>a+b,0) / total);
+  return { numStart, howTo, bracketEnd, question, listicle, colons, total, avgLen };
+}
+
+// ── EXTRACT POWER WORDS ───────────────────────────────────
+const POWER_WORD_MAP = {
+  urgency:    ['now','today','instantly','immediately','fast','quick','hurry','limited','secret','revealed','exposed','finally'],
+  emotion:    ['shocking','insane','crazy','brutal','honest','raw','real','failed','broke','cried','scared','loved','hated','surprised'],
+  social:     ['viral','trending','everyone','nobody','millions','famous','banned','censored','why','truth','actually'],
+  value:      ['free','easy','simple','beginner','complete','ultimate','master','pro','expert','step-by-step','guide','tutorial'],
+  numbers:    ['1','2','3','5','7','10','100','1000','million'],
+  curiosity:  ['secret','hidden','untold','unknown','never','always','only','you','your','why','what','how'],
+  result:     ['made','earned','lost','gained','built','destroyed','changed','transformed','grew','scaled'],
+};
+
+function extractPowerWords(titles, q) {
+  const allText = titles.join(' ').toLowerCase();
+  const words   = allText.split(/\s+/);
+  const freq    = {};
+  words.forEach(w => {
+    const clean = w.replace(/[^a-z0-9]/gi,'').toLowerCase();
+    if (clean.length < 3) return;
+    if (['the','and','for','with','that','this','from','into','have','been','will','are','was','not','but','its','you','your'].includes(clean)) return;
+    freq[clean] = (freq[clean] || 0) + 1;
+  });
+
+  // Map to power categories
+  const found = [];
+  const allCategories = Object.entries(POWER_WORD_MAP);
+  allCategories.forEach(([cat, words]) => {
+    words.forEach(w => {
+      const count = freq[w] || freq[w+'s'] || 0;
+      if (count > 0) found.push({ word: w, cat, count });
+    });
+  });
+
+  // Also grab top organic frequent words
+  const qWords = q.toLowerCase().split(/\s+/);
+  Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,30).forEach(([word, count]) => {
+    if (!qWords.includes(word) && !found.find(f=>f.word===word)) {
+      found.push({ word, cat:'organic', count });
+    }
+  });
+
+  return found.sort((a,b) => b.count - a.count).slice(0, 32);
+}
+
+// ── BUILD FORMULAS ────────────────────────────────────────
+function buildFormulas(q) {
+  const Q = q;
+  return [
+    { template: '[NUMBER] [POWER WORD] [TOPIC] That Actually Work',   example: `7 Insane ${Q} Secrets That Actually Work`,           tags:[{label:'LISTICLE',cls:'tag-green'},{label:'HIGH CTR',cls:'tag-amber'}] },
+    { template: 'How I [RESULT] With [TOPIC] In [TIME]',             example: `How I Made ₦500K With ${Q} In 30 Days`,              tags:[{label:'STORY',cls:'tag-blue'},{label:'PERSONAL',cls:'tag-amber'}] },
+    { template: 'The [TOPIC] [POWER WORD] Nobody Talks About',       example: `The ${Q} Secret Nobody Talks About`,                 tags:[{label:'CURIOSITY',cls:'tag-green'},{label:'EVERGREEN',cls:'tag-amber'}] },
+    { template: '[TOPIC] For Beginners: [RESULT] Guaranteed',        example: `${Q} For Beginners: Results Guaranteed`,             tags:[{label:'HOW-TO',cls:'tag-green'},{label:'BEGINNER',cls:'tag-blue'}] },
+    { template: 'I Tried [TOPIC] For [TIME] — Here\'s The Truth',   example: `I Tried ${Q} For 30 Days — Here's The Truth`,       tags:[{label:'HONEST',cls:'tag-amber'},{label:'REVIEW',cls:'tag-blue'}] },
+    { template: '[NUMBER] Mistakes Everyone Makes With [TOPIC]',     example: `5 Mistakes Everyone Makes With ${Q}`,                tags:[{label:'LISTICLE',cls:'tag-green'},{label:'WARNING',cls:'tag-amber'}] },
+  ];
+}
+
+// ── GENERATE TITLE IDEAS ──────────────────────────────────
+function generateTitles(q, powerWords, formulas) {
+  const pw  = powerWords.filter(w => w.cat !== 'numbers').map(w => w.word);
+  const nums = ['3','5','7','10','12','15','20','50'];
+  const results = ['₦100K','₦500K','1M views','10K subs','passive income','financial freedom','viral content'];
+  const times   = ['7 days','30 days','1 month','3 months','one week','60 days'];
+  const quals   = ['honest','raw','real','detailed','complete','ultimate','insane','shocking','viral'];
+
+  const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+  const Qc   = q.charAt(0).toUpperCase() + q.slice(1);
+  const p1   = pick(pw) || 'secret'; const p2 = pick(pw) || 'proven';
+
+  return [
+    `${pick(nums)} ${Qc} Tips That Went ${pick(['Viral','Crazy','Insane'])} in 2025`,
+    `How I Used ${Qc} to Make ${pick(results)} in ${pick(times)}`,
+    `The ${Qc} ${pick(['Truth','Secret','Blueprint'])} Nobody Told You About`,
+    `${pick(quals.map(w=>w.charAt(0).toUpperCase()+w.slice(1)))} ${Qc} Guide for Complete Beginners (${new Date().getFullYear()})`,
+    `I Tried ${Qc} for ${pick(times)} — This Is What Happened`,
+    `${pick(nums)} ${pick(['Mistakes','Errors','Things'])} to Avoid With ${Qc}`,
+    `${Qc} in ${pick(times)}: From Zero to ${pick(results)}`,
+    `Why Everyone Is ${pick(['Wrong','Lying','Missing Out'])} About ${Qc}`,
+    `The ${pick(quals)} ${Qc} ${pick(['Strategy','Method','System'])} That Actually Works`,
+    `${pick(nums)} ${pick(['Unknown','Hidden','Underrated'])} ${Qc} ${p1} That Changed Everything`,
+  ];
+}
+
+// ── RENDER ────────────────────────────────────────────────
+function renderResults(titles, structure, words, formulas) {
+  const total   = titles.length;
+  const avgLen  = structure.avgLen;
+  const density = words.filter(w=>w.cat!=='organic').length > 0 ? (words.filter(w=>w.cat!=='organic').reduce((a,b)=>a+b.count,0) / total).toFixed(1) : '3.2';
+
+  // Stats
+  document.getElementById('stat-titles').textContent  = total;
+  document.getElementById('stat-length').textContent  = avgLen + ' ch';
+  document.getElementById('stat-density').textContent = density;
+  const topPat = getTopPattern(structure);
+  document.getElementById('stat-pattern').textContent = topPat;
+
+  // Insight
+  const ilen  = avgLen < 50 ? 'short (<50ch)' : avgLen < 70 ? 'medium (50–70ch)' : 'long (>70ch)';
+  document.getElementById('insight-text').innerHTML =
+    `Top creators in <strong>${currentQuery}</strong> use <strong>${ilen}</strong> titles with <strong>${topPat}</strong> structure. 
+     Power words like <strong>${words.slice(0,3).map(w=>'"'+w.word+'"').join(', ')}</strong> appear most frequently. 
+     Click any formula below to copy it, or regenerate title ideas.`;
+
+  // DNA bars
+  const bars = [
+    { label:'Listicle #',    pct: Math.round(structure.listicle / structure.total * 100), col:'var(--g1)' },
+    { label:'How-To',        pct: Math.round(structure.howTo    / structure.total * 100), col:'var(--blue)' },
+    { label:'Contains #',    pct: Math.round(structure.numStart / structure.total * 100), col:'var(--amber)' },
+    { label:'[Brackets]',    pct: Math.round(structure.bracketEnd / structure.total * 100), col:'var(--purple)' },
+    { label:'Question ?',    pct: Math.round(structure.question / structure.total * 100), col:'var(--red)' },
+    { label:'Colon :',       pct: Math.round(structure.colons   / structure.total * 100), col:'var(--muted)' },
+  ];
+  document.getElementById('dna-bars').innerHTML = bars.map(b =>
+    `<div class="dna-row">
+      <div class="dna-label">${b.label}</div>
+      <div class="dna-bar-outer"><div class="dna-bar-inner" data-w="${b.pct}" style="background:${b.col};"></div></div>
+      <div class="dna-val">${b.pct}%</div>
+    </div>`
+  ).join('');
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.dna-bar-inner').forEach(el => {
+      el.style.width = '0';
+      setTimeout(() => { el.style.width = el.dataset.w + '%'; }, 100);
+    });
+  });
+
+  // Word cloud
+  const palette = ['wc-green','wc-amber','wc-blue','wc-purple','wc-red','wc-dim'];
+  document.getElementById('word-cloud').innerHTML = words.map((w, i) =>
+    `<span class="word-chip ${palette[i % palette.length]}" onclick="copyWord('${escHtml(w.word)}')" title="Click to copy">${w.word}<span style="font-size:0.5rem;opacity:0.6;margin-left:4px;">${w.count}×</span></span>`
+  ).join('');
+
+  // Top patterns
+  const patterns = [
+    { rank:'01', name: 'Number + Topic',     desc: 'Listicle format — highest CTR',           pct: `${Math.round(structure.listicle/structure.total*100)}%` },
+    { rank:'02', name: 'How-To Formula',     desc: 'Beginner magnet, strong intent signal',   pct: `${Math.round(structure.howTo/structure.total*100)}%` },
+    { rank:'03', name: 'Bracket Modifier',   desc: '[YEAR] or (FULL VIDEO) — boosts trust',   pct: `${Math.round(structure.bracketEnd/structure.total*100)}%` },
+    { rank:'04', name: 'Colon Structure',    desc: 'Topic: Sub-topic — clear & clickable',    pct: `${Math.round(structure.colons/structure.total*100)}%` },
+    { rank:'05', name: 'Question Format',    desc: 'Sparks curiosity — strong for YouTube',   pct: `${Math.round(structure.question/structure.total*100)}%` },
+  ];
+  document.getElementById('pattern-list').innerHTML = patterns.map(p =>
+    `<div class="pattern-row">
+      <div class="pattern-rank">${p.rank}</div>
+      <div class="pattern-body">
+        <div class="pattern-name">${p.name}</div>
+        <div class="pattern-desc">${p.desc}</div>
+      </div>
+      <div class="pattern-pct">${p.pct}</div>
+    </div>`
+  ).join('');
+
+  // Formula list
+  document.getElementById('formula-list').innerHTML = formulas.map((f, i) =>
+    `<div class="formula-item" id="formula-${i}" onclick="copyFormula(${i})">
+      <div class="formula-template">${f.template}</div>
+      <div class="formula-example">${f.example}</div>
+      <div class="formula-meta">
+        ${f.tags.map(t=>`<span class="formula-tag ${t.cls}">${t.label}</span>`).join('')}
+        <span class="formula-copy-hint">⎘ click to copy example</span>
+      </div>
+    </div>`
+  ).join('');
+
+  // Generated titles
+  renderGenTitles();
+}
+
+// ── RENDER GENERATED TITLES ───────────────────────────────
+function renderGenTitles() {
+  const pw = currentWords.map(w => w.word);
+  document.getElementById('gen-area').innerHTML = generatedList.map((title, i) => {
+    // Highlight power words inside the title
+    let highlighted = escHtml(title);
+    pw.slice(0, 10).forEach(w => {
+      const re = new RegExp(`\\b${w}\\b`, 'gi');
+      highlighted = highlighted.replace(re, `<span class="hl-word">${w}</span>`);
+    });
+    return `<div class="gen-title-row" onclick="copyGenTitle(${i})" title="Click to copy">
+      <div class="gen-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="gen-title-text">${highlighted}</div>
+      <button class="gen-copy-btn" onclick="event.stopPropagation();copyGenTitle(${i})">⎘</button>
+    </div>`;
+  }).join('');
+}
+
+// ── REGENERATE TITLES ─────────────────────────────────────
+function regenTitles() {
+  const formulas = buildFormulas(currentQuery);
+  generatedList  = generateTitles(currentQuery, currentWords, formulas);
+  renderGenTitles();
+  showToast('✓ New title ideas generated');
+}
+
+// ── DEMO FALLBACK ─────────────────────────────────────────
+function renderDemo(q) {
+  const demoTitles = [
+    `How to Start ${q} in 2025`,`${q} for Beginners — Full Guide`,
+    `5 Mistakes to Avoid with ${q}`,`The Truth About ${q} Nobody Tells You`,
+    `I Tried ${q} for 30 Days and This Happened`,`${q} Secrets That Actually Work`,
+    `10 ${q} Tips for Massive Results`,`Complete ${q} Tutorial [2025]`,
+    `Why Your ${q} Isn't Working`,`${q}: From Zero to Pro in 30 Days`,
+  ];
+  currentTitles = demoTitles;
+  currentWords  = [
+    {word:'secrets',cat:'curiosity',count:8},{word:'beginner',cat:'value',count:7},
+    {word:'complete',cat:'value',count:6},{word:'mistakes',cat:'emotion',count:5},
+    {word:'truth',cat:'social',count:5},{word:'actually',cat:'social',count:4},
+    {word:'guide',cat:'value',count:4},{word:'easy',cat:'value',count:3},
+    {word:'fast',cat:'urgency',count:3},{word:'free',cat:'value',count:3},
+    {word:'insane',cat:'emotion',count:2},{word:'viral',cat:'social',count:2},
+  ];
+  const structure = analyseStructure(demoTitles);
+  const formulas  = buildFormulas(q);
+  generatedList   = generateTitles(q, currentWords, formulas);
+  renderResults(demoTitles, structure, currentWords, formulas);
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function getTopPattern(s) {
+  const pts = [
+    {name:'Listicle #', v:s.listicle},
+    {name:'How-To',     v:s.howTo},
+    {name:'[Bracket]',  v:s.bracketEnd},
+    {name:'Colon :',    v:s.colons},
+    {name:'Question ?', v:s.question},
+  ];
+  pts.sort((a,b)=>b.v-a.v);
+  return pts[0].name;
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function copyWord(word) {
+  navigator.clipboard.writeText(word).then(() => showToast(`✓ "${word}" copied`));
+}
+
+function copyPowerWords() {
+  const text = currentWords.map(w => w.word).join(', ');
+  if (!text) { showToast('Run a scan first'); return; }
+  navigator.clipboard.writeText(text).then(() => showToast('✓ All power words copied'));
+}
+
+function copyFormula(i) {
+  const formulas = buildFormulas(currentQuery);
+  const f = formulas[i];
+  if (!f) return;
+  navigator.clipboard.writeText(f.example).then(() => {
+    showToast('✓ Formula example copied');
+    document.getElementById('formula-' + i).classList.add('copied');
+    setTimeout(() => document.getElementById('formula-' + i)?.classList.remove('copied'), 1800);
+  });
+}
+
+function copyGenTitle(i) {
+  const t = generatedList[i];
+  if (!t) return;
+  navigator.clipboard.writeText(t).then(() => showToast('✓ Title copied to clipboard'));
+}
+
+function copyAllTitles() {
+  if (!generatedList.length) { showToast('Run a scan first'); return; }
+  const text = generatedList.map((t,i) => `${i+1}. ${t}`).join('\n');
+  navigator.clipboard.writeText(text).then(() => showToast('✓ All 10 titles copied'));
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+function goTo(page) {
+  const map = {
+    'dashboard':       'nexus-dashboard.html',
+    'viral-velocity':  'nexus-viral-velocity.html',
+    'title-dna':       'nexus-title-dna.html',
+    'niche-map':       'nexus-niche-map.html',
+    'seo-matrix':      'nexus-seo-matrix.html',
+    'live-feed':       'nexus-live-feed.html',
+    'pro':             'nexus-pro.html',
+    'pro-momentum':    'nexus-pro.html',
+    'pro-gap':         'nexus-pro.html',
+    'pro-weak':        'nexus-pro.html',
+    'pro-firstmover':  'nexus-pro.html',
+    'terms':           'nexus-terms.html',
+    'privacy':         'nexus-privacy.html',
+    'admin':           'nexus-admin.html',
+  };
+  try {
+    const email  = localStorage.getItem('nexus_email') || '';
+    const events = JSON.parse(localStorage.getItem('nexus_events') || '[]');
+    events.push({ gmail:email, event_type:'navigate', to:page, timestamp:new Date().toISOString() });
+    if (events.length > 200) events.splice(0, events.length - 200);
+    localStorage.setItem('nexus_events', JSON.stringify(events));
+    gtag('event', 'page_navigate', { to: page });
+  } catch(e) {}
+  const dest = map[page];
+  if (dest) window.location.href = dest;
+  else showToast('Page coming soon — building now');
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────
+function toggleSidebar() {
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+    document.getElementById('sb-overlay').style.display =
+      document.getElementById('sidebar').classList.contains('mobile-open') ? 'block' : 'none';
+  } else {
+    sidebarCollapsed = !sidebarCollapsed;
+    document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+    document.getElementById('main').classList.toggle('collapsed', sidebarCollapsed);
+  }
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sb-overlay').style.display = 'none';
+}
+
+// ── THEME ─────────────────────────────────────────────────
+let dark = true;
+function toggleTheme() {
+  dark = !dark;
+  document.body.style.background = dark ? 'var(--off)' : '#F5F5F5';
+  document.body.style.color = dark ? 'var(--white)' : '#111';
+  document.getElementById('theme-btn').textContent = dark ? '🌙' : '☀️';
+}
+
+// ── SETTINGS ──────────────────────────────────────────────
+function showSettings() {
+  const did = getDeviceId();
+  showToast(`Device: ${did.slice(0,18)}… · ${isPro ? 'PRO Active' : 'Free Plan'}`);
+}
+
+// ── CMD PALETTE ───────────────────────────────────────────
+const CMD = [
+  {ico:'⊞',name:'Dashboard',       sub:'Main hub',                        go:'dashboard'},
+  {ico:'⚡',name:'Viral Velocity',  sub:'Score keywords 0–100',            go:'viral-velocity'},
+  {ico:'🧬',name:'Title DNA',       sub:'Extract power words + titles',    go:'title-dna'},
+  {ico:'🗺',name:'Niche Map',       sub:'Saturation analysis',             go:'niche-map'},
+  {ico:'📊',name:'SEO Matrix',      sub:'7-dimension title scoring',       go:'seo-matrix'},
+  {ico:'📡',name:'Live Feed',       sub:'Real-time YouTube trending',      go:'live-feed'},
+  {ico:'✦', name:'Upgrade PRO',     sub:'₦3,000/month — 4 extra tools',   go:'pro'},
+  {ico:'📈',name:'Trend Momentum',  sub:'PRO — Rising or falling?',        go:'pro'},
+  {ico:'🔍',name:'Gap Finder',      sub:'PRO — Find uncovered topics',     go:'pro'},
+  {ico:'⚔', name:'Weakness Report', sub:'PRO — Attack vectors',            go:'pro'},
+  {ico:'★', name:'First Mover',     sub:'PRO — Zero competition alerts',   go:'pro'},
+];
+let cmdFilt = CMD, cmdSel = 0;
+
+function openCmd() {
+  document.getElementById('cmd-overlay').classList.add('open');
+  document.getElementById('cmd-input').value = '';
+  cmdFilt = CMD; cmdSel = 0; renderCmd();
+  setTimeout(() => document.getElementById('cmd-input').focus(), 50);
+}
+function closeCmd()   { document.getElementById('cmd-overlay').classList.remove('open'); }
+function filterCmd(v) { cmdFilt = CMD.filter(c => c.name.toLowerCase().includes(v.toLowerCase()) || c.sub.toLowerCase().includes(v.toLowerCase())); cmdSel = 0; renderCmd(); }
+function renderCmd()  {
+  document.getElementById('cmd-list').innerHTML = cmdFilt.map((c,i) => `
+    <div class="cmd-item${i===cmdSel?' hi':''}" onclick="goTo('${c.go}');closeCmd()">
+      <div class="cmd-ico">${c.ico}</div>
+      <div><div class="cmd-name">${c.name}</div><div class="cmd-sub">${c.sub}</div></div>
+    </div>`).join('');
+}
+function cmdNav(e) {
+  if (e.key==='ArrowDown') { cmdSel=Math.min(cmdSel+1,cmdFilt.length-1); renderCmd(); }
+  else if (e.key==='ArrowUp') { cmdSel=Math.max(cmdSel-1,0); renderCmd(); }
+  else if (e.key==='Enter' && cmdFilt[cmdSel]) { goTo(cmdFilt[cmdSel].go); closeCmd(); }
+  else if (e.key==='Escape') closeCmd();
+}
+document.addEventListener('keydown', e => {
+  if ((e.metaKey||e.ctrlKey) && e.key==='k') { e.preventDefault(); openCmd(); }
+  if (e.key==='Escape') closeCmd();
+});
+
+renderCmd();
+</script>
+</body>
+</html>

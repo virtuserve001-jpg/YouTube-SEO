@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEO Matrix — NEXUS v2</title>
+
+<!-- GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7PMXBZF9PL"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-7PMXBZF9PL');</script>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+/* ─── TOKENS ─────────────────────────────── */
+:root {
+  --black:  #000000;
+  --off:    #0A0A0A;
+  --s1:     #0F0F0F;
+  --s2:     #141414;
+  --s3:     #1A1A1A;
+  --s4:     #202020;
+  --line:   rgba(255,255,255,0.06);
+  --line-g: rgba(0,255,136,0.18);
+  --line-a: rgba(245,166,35,0.2);
+  --g1:     #00FF88;
+  --g2:     #00CC6A;
+  --amber:  #F5A623;
+  --red:    #FF4455;
+  --blue:   #4F8EF7;
+  --purple: #9B6DFF;
+  --white:  #F0F0F0;
+  --muted:  #707070;
+  --dim:    #404040;
+  --font-d: 'Bebas Neue', sans-serif;
+  --font-b: 'DM Sans', sans-serif;
+  --font-m: 'JetBrains Mono', monospace;
+  --r:      10px;
+  --r-sm:   7px;
+  --tr:     all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ─── RESET ──────────────────────────────── */
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { height:100%; }
+body {
+  font-family: var(--font-b);
+  background: var(--off);
+  color: var(--white);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection { background: rgba(0,255,136,0.18); color: var(--g1); }
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font-b); cursor: pointer; border: none; background: none; outline: none; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--s1); }
+::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+
+/* ─── HEADER ─────────────────────────────── */
+#header {
+  position: fixed; top:0; left:0; right:0; z-index:900;
+  height: 56px;
+  background: rgba(10,10,10,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center;
+  padding: 0 20px; justify-content: space-between; gap: 12px;
+}
+#header::after {
+  content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,0.15) 30%, rgba(0,255,136,0.15) 70%, transparent);
+}
+.hdr-left { display:flex; align-items:center; gap:12px; }
+.hdr-right { display:flex; align-items:center; gap:10px; }
+.menu-btn {
+  width:36px; height:36px; border-radius:var(--r-sm);
+  border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--muted); transition:var(--tr); flex-shrink:0;
+}
+.menu-btn:hover { border-color:var(--line-g); color:var(--g1); }
+.menu-btn svg { width:16px; height:16px; }
+.logo { display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none; }
+.logo-hex {
+  width:30px; height:30px; border:1.5px solid var(--g1); border-radius:7px;
+  transform:rotate(45deg); display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 16px rgba(0,255,136,0.2); animation:hexPulse 3s ease-in-out infinite; flex-shrink:0;
+}
+.logo-hex span { transform:rotate(-45deg); font-family:var(--font-d); font-size:0.875rem; color:var(--g1); display:block; }
+@keyframes hexPulse { 0%,100%{box-shadow:0 0 12px rgba(0,255,136,0.15);} 50%{box-shadow:0 0 28px rgba(0,255,136,0.4);} }
+.logo-name { font-family:var(--font-d); font-size:1.125rem; letter-spacing:0.18em; color:var(--white); }
+.logo-name em { color:var(--g1); font-style:normal; }
+.live-badge {
+  display:flex; align-items:center; gap:5px; font-family:var(--font-m); font-size:0.5625rem;
+  letter-spacing:0.12em; color:var(--red); background:rgba(255,68,85,0.08);
+  border:1px solid rgba(255,68,85,0.2); padding:3px 9px; border-radius:100px;
+}
+.live-dot { width:5px; height:5px; border-radius:50%; background:var(--red); box-shadow:0 0 6px var(--red); animation:blink 1.5s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.online-pill { display:flex; align-items:center; gap:5px; font-family:var(--font-m); font-size:0.5625rem; letter-spacing:0.1em; color:var(--g1); }
+.online-dot { width:5px; height:5px; border-radius:50%; background:var(--g1); box-shadow:0 0 6px var(--g1); animation:blink 2s ease-in-out infinite; }
+.hdr-btn { padding:7px 14px; border-radius:var(--r-sm); font-family:var(--font-m); font-size:0.5625rem; letter-spacing:0.12em; font-weight:700; text-transform:uppercase; transition:var(--tr); }
+.hdr-btn-free { border:1px solid var(--line); color:var(--muted); }
+.hdr-btn-free:hover { border-color:var(--line-g); color:var(--g1); }
+.hdr-btn-pro { background:linear-gradient(135deg,var(--amber),#d48800); color:#000; box-shadow:0 0 16px rgba(245,166,35,0.25); animation:proPulse 2.5s ease-in-out infinite; }
+@keyframes proPulse { 0%,100%{box-shadow:0 0 10px rgba(245,166,35,0.2);} 50%{box-shadow:0 0 24px rgba(245,166,35,0.5);} }
+.theme-btn { width:36px; height:36px; border-radius:var(--r-sm); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:1rem; transition:var(--tr); color:var(--muted); }
+.theme-btn:hover { border-color:var(--line-g); }
+
+/* ─── LAYOUT ─────────────────────────────── */
+.app-wrap { display:flex; padding-top:56px; min-height:100vh; }
+
+/* ─── SIDEBAR ────────────────────────────── */
+#sidebar {
+  width:224px; flex-shrink:0; background:var(--s1); border-right:1px solid var(--line);
+  position:fixed; top:56px; left:0; bottom:0;
+  overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column;
+  transition:transform 0.3s cubic-bezier(0.4,0,0.2,1), width 0.3s cubic-bezier(0.4,0,0.2,1); z-index:800;
+}
+#sidebar.collapsed { width:56px; }
+#sidebar.collapsed .nav-label, #sidebar.collapsed .nav-text,
+#sidebar.collapsed .nav-badge, #sidebar.collapsed .sb-pro { display:none; }
+#sidebar.collapsed .nav-item { justify-content:center; padding:11px; }
+@media(max-width:768px){
+  #sidebar { transform:translateX(-100%); width:224px !important; }
+  #sidebar.mobile-open { transform:translateX(0); }
+  #sb-overlay { display:block; }
+  .main-content { margin-left:0 !important; }
+}
+#sb-overlay { display:none; position:fixed; inset:0; z-index:799; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px); }
+.sb-section { padding:16px 10px 6px; }
+.nav-label { font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--dim); padding:0 6px; margin-bottom:5px; white-space:nowrap; }
+.nav-item { display:flex; align-items:center; gap:10px; width:100%; padding:9px 10px; border-radius:var(--r-sm); font-size:0.875rem; font-weight:500; color:var(--muted); cursor:pointer; transition:var(--tr); white-space:nowrap; border:none; background:none; text-align:left; position:relative; }
+.nav-item:hover { background:var(--s3); color:var(--white); }
+.nav-item.active { background:rgba(0,255,136,0.07); color:var(--g1); }
+.nav-item.active::before { content:''; position:absolute; left:0; top:50%; transform:translateY(-50%); width:2px; height:18px; background:var(--g1); border-radius:0 2px 2px 0; }
+.nav-icon { font-size:1rem; width:18px; text-align:center; flex-shrink:0; }
+.nav-text { flex:1; }
+.nav-badge { font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.08em; padding:2px 6px; border-radius:4px; background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.2); color:var(--amber); }
+.sb-pro { margin:auto 10px 14px; background:linear-gradient(135deg,rgba(245,166,35,0.08),rgba(245,166,35,0.03)); border:1px solid var(--line-a); border-radius:var(--r); padding:14px; cursor:pointer; transition:var(--tr); }
+.sb-pro:hover { border-color:rgba(245,166,35,0.35); }
+.sb-pro-title { font-weight:600; font-size:0.875rem; color:var(--amber); margin-bottom:4px; }
+.sb-pro-sub { font-size:0.75rem; color:var(--muted); line-height:1.5; margin-bottom:10px; }
+.sb-pro-btn { width:100%; padding:8px; background:linear-gradient(135deg,var(--amber),#d48800); color:#000; font-weight:700; font-size:0.8125rem; border-radius:var(--r-sm); text-align:center; transition:var(--tr); }
+.sb-pro-btn:hover { box-shadow:0 4px 16px rgba(245,166,35,0.35); }
+
+/* ─── MAIN CONTENT ───────────────────────── */
+.main-content { flex:1; margin-left:224px; min-width:0; padding:28px 28px 80px; transition:margin-left 0.3s cubic-bezier(0.4,0,0.2,1); }
+.main-content.collapsed { margin-left:56px; }
+@media(max-width:768px){ .main-content { margin-left:0 !important; padding:16px 16px 100px; } }
+
+/* ─── PAGE HEADER ─────────────────────────── */
+.page-hdr { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:24px; animation:fadeDown 0.4s ease both; }
+.page-hdr-left { min-width:0; }
+.breadcrumb { display:flex; align-items:center; gap:6px; font-family:var(--font-m); font-size:0.5625rem; color:var(--dim); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px; }
+.breadcrumb a { color:var(--dim); cursor:pointer; transition:color 0.2s; }
+.breadcrumb a:hover { color:var(--g1); }
+.breadcrumb .sep { color:var(--dim); }
+.page-title { font-family:var(--font-d); font-size:clamp(1.75rem,3.5vw,2.5rem); letter-spacing:0.04em; line-height:1.0; color:var(--white); }
+.page-title .accent { color:var(--g1); }
+.page-title .accent-b { color:var(--blue); }
+.page-sub { font-size:0.9375rem; color:var(--muted); line-height:1.6; margin-top:6px; max-width:560px; }
+
+/* ─── INPUT PANELS ───────────────────────── */
+.input-card {
+  background:var(--s2); border:1px solid var(--line-g);
+  border-radius:var(--r); padding:20px; margin-bottom:16px;
+  position:relative; overflow:hidden;
+  animation:fadeDown 0.4s ease 0.05s both;
+}
+.input-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--g1) 40%,var(--g2) 60%,transparent); opacity:0.4; }
+.input-card.secondary { border-color:var(--line); }
+.input-card.secondary::before { background:linear-gradient(90deg,transparent,rgba(79,142,247,0.4) 50%,transparent); }
+
+.field-label {
+  font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.2em;
+  text-transform:uppercase; color:var(--dim); margin-bottom:8px;
+  display:flex; align-items:center; gap:8px;
+}
+.field-label::after { content:''; flex:1; height:1px; background:var(--line); }
+
+.seo-input {
+  width:100%; background:var(--s3); border:1px solid var(--line);
+  border-radius:var(--r-sm); padding:12px 16px;
+  font-family:var(--font-b); font-size:0.9375rem; color:var(--white);
+  outline:none; transition:var(--tr);
+}
+.seo-input::placeholder { color:var(--dim); }
+.seo-input:focus { border-color:var(--line-g); box-shadow:0 0 0 3px rgba(0,255,136,0.06); }
+.seo-input.has-value { border-color:rgba(0,255,136,0.2); }
+
+.seo-textarea {
+  width:100%; background:var(--s3); border:1px solid var(--line);
+  border-radius:var(--r-sm); padding:12px 16px;
+  font-family:var(--font-b); font-size:0.875rem; color:var(--white);
+  outline:none; transition:var(--tr); resize:vertical; min-height:88px; line-height:1.6;
+}
+.seo-textarea::placeholder { color:var(--dim); }
+.seo-textarea:focus { border-color:var(--line-g); box-shadow:0 0 0 3px rgba(0,255,136,0.06); }
+
+.seo-select {
+  background:var(--s3); border:1px solid var(--line);
+  border-radius:var(--r-sm); padding:12px 14px;
+  font-family:var(--font-m); font-size:0.6875rem; color:var(--muted);
+  outline:none; transition:var(--tr); cursor:pointer;
+  appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23404040' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 12px center; padding-right:32px;
+}
+.seo-select:focus { border-color:var(--line-g); color:var(--g1); outline:none; }
+.seo-select option { background:var(--s2); }
+
+.input-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+.input-row .seo-input, .input-row .seo-select { flex:1; min-width:140px; }
+.input-row .seo-select { flex:0 0 auto; }
+
+.char-counter {
+  font-family:var(--font-m); font-size:0.5625rem; letter-spacing:0.08em;
+  text-align:right; margin-top:5px; transition:color 0.2s;
+}
+.char-counter.ok    { color:var(--g1); }
+.char-counter.warn  { color:var(--amber); }
+.char-counter.bad   { color:var(--red); }
+
+/* Run button */
+.btn-run {
+  width:100%; padding:13px;
+  background:linear-gradient(135deg,var(--g1),var(--g2));
+  color:#000; font-family:var(--font-d);
+  font-size:1.125rem; letter-spacing:0.1em;
+  border:none; border-radius:var(--r-sm); cursor:pointer;
+  transition:var(--tr); display:flex; align-items:center; justify-content:center; gap:10px;
+  margin-top:4px;
+}
+.btn-run:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,255,136,0.35); }
+.btn-run:active { transform:translateY(0); }
+.btn-run.loading { opacity:0.7; pointer-events:none; }
+.btn-run .spin { animation:spin 1s linear infinite; display:none; }
+.btn-run.loading .spin { display:inline-block; }
+.btn-run.loading .run-icon { display:none; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ─── LOADER ─────────────────────────────── */
+#loader-wrap { display:none; padding:8px 0 16px; animation:fadeDown 0.3s ease; }
+#loader-wrap.active { display:block; }
+.loader-bar-outer { height:2px; background:var(--s4); border-radius:2px; overflow:hidden; margin-bottom:10px; }
+.loader-bar-inner { height:100%; background:linear-gradient(90deg,var(--g2),var(--g1),var(--blue),var(--g1),var(--g2)); background-size:200% 100%; animation:shimmer 1.4s ease-in-out infinite; border-radius:2px; width:100%; }
+@keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+.loader-msg { font-family:var(--font-m); font-size:0.5625rem; letter-spacing:0.15em; color:var(--g1); text-transform:uppercase; }
+
+/* ─── RESULTS ─────────────────────────────── */
+#results-wrap { display:none; animation:fadeUp 0.35s ease; }
+#results-wrap.active { display:block; }
+
+/* ─── SCORE HERO ─────────────────────────── */
+.score-hero {
+  display:grid; grid-template-columns:200px 1fr; gap:16px; margin-bottom:16px;
+  animation:fadeUp 0.3s ease;
+}
+@media(max-width:640px){ .score-hero { grid-template-columns:1fr; } }
+
+.score-ring-card {
+  background:var(--s2); border:1px solid var(--line);
+  border-radius:var(--r); padding:20px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; position:relative; overflow:hidden;
+}
+.score-ring-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--score-col,var(--g1)) 50%,transparent); opacity:0.5; }
+
+/* SVG ring */
+.ring-svg { width:120px; height:120px; margin:0 auto 12px; transform:rotate(-90deg); }
+.ring-track { fill:none; stroke:var(--s4); stroke-width:10; }
+.ring-fill   { fill:none; stroke-width:10; stroke-linecap:round; stroke-dasharray:339.292; stroke-dashoffset:339.292; transition:stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1), stroke 0.3s; }
+
+.score-number {
+  font-family:var(--font-d); font-size:3.5rem; line-height:1;
+  letter-spacing:-0.01em; transition:color 0.3s;
+}
+.score-grade {
+  font-family:var(--font-d); font-size:1.5rem; letter-spacing:0.08em;
+  margin-top:2px; transition:color 0.3s;
+}
+.score-grade-desc { font-family:var(--font-m); font-size:0.5625rem; color:var(--muted); letter-spacing:0.08em; margin-top:6px; line-height:1.5; }
+
+/* Dimensions card */
+.dims-card {
+  background:var(--s2); border:1px solid var(--line);
+  border-radius:var(--r); padding:20px;
+}
+.panel-title-row {
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;
+}
+.panel-title {
+  font-family:var(--font-m); font-size:0.5625rem; letter-spacing:0.18em;
+  text-transform:uppercase; color:var(--muted);
+  display:flex; align-items:center; gap:8px;
+}
+.panel-title::after { content:''; display:block; width:28px; height:1px; background:var(--line); }
+.panel-action {
+  font-family:var(--font-m); font-size:0.5625rem; letter-spacing:0.1em;
+  color:var(--g1); cursor:pointer; transition:var(--tr); text-transform:uppercase;
+  background:rgba(0,255,136,0.06); border:1px solid var(--line-g);
+  padding:4px 10px; border-radius:4px;
+}
+.panel-action:hover { background:rgba(0,255,136,0.1); }
+
+/* Dimension progress bars */
+.dim-row { display:flex; align-items:center; gap:10px; margin-bottom:11px; }
+.dim-row:last-child { margin-bottom:0; }
+.dim-label {
+  font-family:var(--font-m); font-size:0.5625rem; letter-spacing:0.06em;
+  color:var(--muted); white-space:nowrap; width:110px; flex-shrink:0;
+  display:flex; align-items:center; gap:6px; cursor:help;
+}
+.dim-label .tip-icon { color:var(--dim); font-size:0.625rem; }
+.dim-track { flex:1; height:5px; background:var(--s4); border-radius:3px; overflow:hidden; }
+.dim-fill { height:100%; border-radius:3px; transition:width 1s cubic-bezier(0.4,0,0.2,1) 0.1s; }
+.dim-score {
+  font-family:var(--font-m); font-size:0.625rem; letter-spacing:0.06em;
+  width:42px; text-align:right; flex-shrink:0;
+}
+
+/* ─── GRID 2-COL ─────────────────────────── */
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+@media(max-width:780px){ .grid-2 { grid-template-columns:1fr; } }
+
+/* ─── PANEL ──────────────────────────────── */
+.panel {
+  background:var(--s2); border:1px solid var(--line);
+  border-radius:var(--r); overflow:hidden; margin-bottom:16px;
+}
+.panel-head {
+  padding:14px 18px; border-bottom:1px solid var(--line);
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.panel-body { padding:16px 18px; }
+
+/* Chart */
+.chart-wrap { position:relative; height:200px; }
+.chart-wrap.radar-wrap { height:220px; }
+
+/* ─── CHECKLIST ──────────────────────────── */
+.check-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:9px 14px; border-radius:var(--r-sm);
+  margin-bottom:6px; font-size:0.875rem; line-height:1.5;
+  transition:var(--tr);
+}
+.check-item:last-child { margin-bottom:0; }
+.check-item.pass { background:rgba(0,255,136,0.04); border:1px solid rgba(0,255,136,0.12); color:var(--white); }
+.check-item.fail { background:rgba(255,68,85,0.04);  border:1px solid rgba(255,68,85,0.12);  color:var(--white); }
+.check-item.warn { background:rgba(245,166,35,0.04); border:1px solid rgba(245,166,35,0.1);  color:var(--white); }
+.check-icon { font-family:var(--font-m); font-size:0.75rem; flex-shrink:0; padding-top:1px; }
+.check-item.pass .check-icon { color:var(--g1); }
+.check-item.fail .check-icon { color:var(--red); }
+.check-item.warn .check-icon { color:var(--amber); }
+
+/* ─── FIX ITEMS ──────────────────────────── */
+.fix-item {
+  display:flex; align-items:flex-start; gap:12px;
+  padding:12px 14px; border-radius:var(--r-sm);
+  background:var(--s3); border:1px solid var(--line);
+  margin-bottom:8px; transition:var(--tr); cursor:pointer;
+}
+.fix-item:last-child { margin-bottom:0; }
+.fix-item:hover { border-color:rgba(0,255,136,0.2); transform:translateX(4px); }
+.fix-number {
+  font-family:var(--font-d); font-size:1.25rem; line-height:1;
+  color:var(--dim); flex-shrink:0; min-width:22px;
+}
+.fix-body { flex:1; min-width:0; }
+.fix-title { font-size:0.875rem; font-weight:600; color:var(--white); margin-bottom:3px; }
+.fix-desc { font-size:0.8125rem; color:var(--muted); line-height:1.5; }
+.fix-impact {
+  font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.1em;
+  padding:2px 8px; border-radius:4px; white-space:nowrap; flex-shrink:0; margin-top:2px;
+}
+.fix-impact.high { background:rgba(255,68,85,0.1); border:1px solid rgba(255,68,85,0.25); color:var(--red); }
+.fix-impact.med  { background:rgba(245,166,35,0.08); border:1px solid rgba(245,166,35,0.2); color:var(--amber); }
+.fix-impact.low  { background:rgba(79,142,247,0.08); border:1px solid rgba(79,142,247,0.2); color:var(--blue); }
+
+/* ─── COMPETITOR ROW ─────────────────────── */
+.comp-row {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 0; border-bottom:1px solid var(--line);
+  transition:var(--tr); cursor:pointer;
+}
+.comp-row:last-child { border-bottom:none; }
+.comp-row:hover { padding-left:6px; }
+.comp-rank { font-family:var(--font-d); font-size:1.25rem; color:var(--dim); width:28px; flex-shrink:0; text-align:center; }
+.comp-thumb { width:66px; height:40px; border-radius:4px; background:var(--s3); flex-shrink:0; overflow:hidden; }
+.comp-thumb img { width:100%; height:100%; object-fit:cover; }
+.comp-body { flex:1; min-width:0; }
+.comp-title { font-size:0.8125rem; font-weight:500; color:var(--white); overflow:hidden; white-space:nowrap; text-overflow:ellipsis; margin-bottom:3px; }
+.comp-meta { font-family:var(--font-m); font-size:0.5625rem; color:var(--dim); }
+.comp-score-wrap { flex-shrink:0; text-align:center; }
+.comp-score { font-family:var(--font-d); font-size:1.5rem; line-height:1; }
+.comp-win { font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.1em; margin-top:2px; }
+
+/* ─── OPTIMIZED TITLE CARD ────────────────── */
+.opt-title-card {
+  background:var(--s3); border:1px solid rgba(0,255,136,0.15);
+  border-left:3px solid var(--g1);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  padding:14px 16px; margin-bottom:8px;
+  cursor:pointer; transition:var(--tr);
+}
+.opt-title-card:hover { background:rgba(0,255,136,0.04); transform:translateX(4px); }
+.opt-title-text { font-size:0.9375rem; font-weight:500; color:var(--white); line-height:1.4; margin-bottom:5px; }
+.opt-title-meta { font-family:var(--font-m); font-size:0.5625rem; color:var(--dim); display:flex; gap:10px; flex-wrap:wrap; }
+.opt-title-meta .score { color:var(--g1); font-weight:700; }
+
+/* ─── STAT BOXES ─────────────────────────── */
+.stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+@media(max-width:640px){ .stat-row { grid-template-columns:repeat(2,1fr); } }
+.stat-box { background:var(--s2); border:1px solid var(--line); border-radius:var(--r); padding:16px; border-left:2px solid var(--accent,var(--g1)); transition:var(--tr); }
+.stat-box:hover { transform:translateY(-2px); }
+.stat-lbl { font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--dim); margin-bottom:8px; }
+.stat-val { font-family:var(--font-d); font-size:2.25rem; line-height:1; color:var(--accent,var(--g1)); margin-bottom:3px; }
+.stat-meta { font-size:0.75rem; color:var(--dim); }
+
+/* ─── PRO GATE ───────────────────────────── */
+.pro-gate {
+  background:linear-gradient(135deg,rgba(245,166,35,0.06),rgba(245,166,35,0.02));
+  border:1px solid var(--line-a); border-radius:var(--r);
+  padding:32px 24px; text-align:center; margin-bottom:16px;
+  position:relative; overflow:hidden;
+}
+.pro-gate::before { content:''; position:absolute; inset:-100%; background:conic-gradient(from 0deg, transparent 340deg, rgba(245,166,35,0.04) 360deg); animation:rotGlow 14s linear infinite; }
+@keyframes rotGlow { to { transform:rotate(360deg); } }
+.pro-gate-inner { position:relative; z-index:2; }
+.pro-gate-icon { font-size:2.5rem; margin-bottom:10px; }
+.pro-gate-title { font-family:var(--font-d); font-size:1.75rem; letter-spacing:0.06em; color:var(--amber); margin-bottom:8px; }
+.pro-gate-sub { font-size:0.9375rem; color:var(--muted); line-height:1.7; margin-bottom:20px; max-width:400px; margin-left:auto; margin-right:auto; }
+.pro-gate-features { display:flex; justify-content:center; gap:12px; flex-wrap:wrap; margin-bottom:20px; }
+.pro-gate-feat { font-family:var(--font-m); font-size:0.5625rem; letter-spacing:0.08em; padding:5px 12px; border-radius:100px; background:rgba(245,166,35,0.08); border:1px solid rgba(245,166,35,0.2); color:var(--amber); }
+
+/* ─── PRO STRIP ──────────────────────────── */
+.pro-strip { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; background:linear-gradient(90deg,rgba(245,166,35,0.06),rgba(245,166,35,0.02)); border:1px solid var(--line-a); border-radius:var(--r); padding:14px 20px; margin-bottom:16px; cursor:pointer; transition:var(--tr); }
+.pro-strip:hover { border-color:rgba(245,166,35,0.35); }
+.pro-strip-left { display:flex; align-items:center; gap:12px; }
+.pro-strip-icon { width:36px; height:36px; border-radius:9px; background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.2); display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+.pro-strip-title { font-weight:600; font-size:0.9375rem; color:var(--amber); margin-bottom:2px; }
+.pro-strip-sub { font-size:0.8125rem; color:var(--muted); }
+
+/* ─── TOOLTIP ────────────────────────────── */
+[data-tip] { position:relative; cursor:help; }
+[data-tip]:hover::after { content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:var(--s3); border:1px solid var(--line); color:var(--white); font-family:var(--font-m); font-size:0.625rem; padding:5px 10px; border-radius:5px; white-space:normal; max-width:200px; text-align:center; line-height:1.5; z-index:9000; pointer-events:none; }
+
+/* ─── BOTTOM NAV ─────────────────────────── */
+#bottom-nav { display:none; position:fixed; bottom:0; left:0; right:0; z-index:850; background:rgba(10,10,10,0.96); border-top:1px solid var(--line); backdrop-filter:blur(20px); padding:6px 0 env(safe-area-inset-bottom,8px); }
+@media(max-width:768px){ #bottom-nav { display:flex; } }
+.bn-inner { display:flex; width:100%; justify-content:space-around; }
+.bn-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 4px; font-family:var(--font-m); font-size:0.5rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--dim); cursor:pointer; transition:0.2s; border:none; background:none; }
+.bn-item.active { color:var(--g1); }
+.bn-icon { font-size:1.25rem; }
+
+/* ─── TOAST ──────────────────────────────── */
+#toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--s2); border:1px solid var(--line-g); color:var(--white); font-size:0.875rem; padding:12px 22px; border-radius:var(--r-sm); z-index:9999; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); box-shadow:0 8px 32px rgba(0,0,0,0.5); white-space:nowrap; pointer-events:none; }
+#toast.show { transform:translateX(-50%) translateY(0); }
+
+/* ─── CMD PALETTE ─────────────────────────── */
+#cmd-overlay { position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.75); backdrop-filter:blur(10px); display:none; align-items:flex-start; justify-content:center; padding-top:12vh; }
+#cmd-overlay.open { display:flex; }
+#cmd-box { background:var(--s2); border:1px solid var(--line-g); border-radius:var(--r); width:100%; max-width:540px; overflow:hidden; box-shadow:0 32px 80px rgba(0,0,0,0.6); animation:fadeDown 0.2s ease; }
+#cmd-input { width:100%; background:transparent; border:none; color:var(--white); font-family:var(--font-b); font-size:1rem; padding:18px 20px; border-bottom:1px solid var(--line); outline:none; }
+#cmd-input::placeholder { color:var(--dim); }
+.cmd-item { display:flex; align-items:center; gap:12px; padding:11px 20px; cursor:pointer; transition:0.15s; }
+.cmd-item:hover, .cmd-item.hi { background:rgba(0,255,136,0.06); }
+.cmd-item.hi .cmd-name { color:var(--g1); }
+.cmd-ico { width:30px; height:30px; border-radius:7px; background:var(--s3); display:flex; align-items:center; justify-content:center; font-size:0.875rem; }
+.cmd-name { font-size:0.9375rem; font-weight:500; color:var(--white); }
+.cmd-sub { font-size:0.75rem; color:var(--muted); margin-top:1px; }
+.cmd-hint { padding:9px 20px; border-top:1px solid var(--line); font-family:var(--font-m); font-size:0.5625rem; color:var(--dim); letter-spacing:0.1em; }
+
+/* ─── ANIMATIONS ─────────────────────────── */
+@keyframes fadeDown { from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);} }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);} }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- CMD Overlay -->
+<div id="cmd-overlay" onclick="if(event.target===this)closeCmd()">
+  <div id="cmd-box">
+    <input id="cmd-input" type="text" placeholder="Search tools… ⌘K" oninput="filterCmd(this.value)" onkeydown="cmdNav(event)" autocomplete="off">
+    <div id="cmd-list"></div>
+    <div class="cmd-hint">↑↓ navigate &nbsp;·&nbsp; Enter to open &nbsp;·&nbsp; Esc to close</div>
+  </div>
+</div>
+
+<div id="sb-overlay" onclick="closeSidebar()"></div>
+
+<!-- ════ HEADER ════ -->
+<header id="header">
+  <div class="hdr-left">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <div class="logo" onclick="goTo('dashboard')">
+      <div class="logo-hex"><span>N</span></div>
+      <div><div class="logo-name">NEXUS <em>v2</em></div></div>
+    </div>
+    <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+  </div>
+  <div class="hdr-right">
+    <div class="online-pill"><span class="online-dot"></span><span id="online-count">247</span>&nbsp;online</div>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">🌙</button>
+    <button class="hdr-btn hdr-btn-free" id="tier-btn" onclick="goTo('pro')">✦ Free</button>
+    <button class="hdr-btn" style="background:rgba(0,255,136,0.07);border:1px solid var(--line-g);color:var(--g1);font-family:var(--font-m);font-size:0.5rem;letter-spacing:0.1em;" onclick="openCmd()" title="⌘K">⌘K</button>
+  </div>
+</header>
+
+<!-- ════ APP ════ -->
+<div class="app-wrap">
+
+  <!-- ════ SIDEBAR ════ -->
+  <nav id="sidebar">
+    <div class="sb-section">
+      <div class="nav-label">Main</div>
+      <button class="nav-item" onclick="goTo('dashboard')"><span class="nav-icon">⊞</span><span class="nav-text">Dashboard</span></button>
+    </div>
+    <div class="sb-section">
+      <div class="nav-label">Free Tools</div>
+      <button class="nav-item" onclick="goTo('viral-velocity')"><span class="nav-icon">⚡</span><span class="nav-text">Viral Velocity</span></button>
+      <button class="nav-item" onclick="goTo('title-dna')"><span class="nav-icon">🧬</span><span class="nav-text">Title DNA</span></button>
+      <button class="nav-item" onclick="goTo('niche-map')"><span class="nav-icon">🗺</span><span class="nav-text">Niche Map</span></button>
+      <button class="nav-item active"><span class="nav-icon">📊</span><span class="nav-text">SEO Matrix</span></button>
+      <button class="nav-item" onclick="goTo('live-feed')"><span class="nav-icon">📡</span><span class="nav-text">Live Feed</span></button>
+    </div>
+    <div class="sb-section">
+      <div class="nav-label">PRO Tools</div>
+      <button class="nav-item" onclick="goTo('pro-momentum')"><span class="nav-icon">📈</span><span class="nav-text">Trend Momentum</span><span class="nav-badge">PRO</span></button>
+      <button class="nav-item" onclick="goTo('pro-gap')"><span class="nav-icon">🔍</span><span class="nav-text">Gap Finder</span><span class="nav-badge">PRO</span></button>
+      <button class="nav-item" onclick="goTo('pro-weak')"><span class="nav-icon">⚔</span><span class="nav-text">Weakness Report</span><span class="nav-badge">PRO</span></button>
+      <button class="nav-item" onclick="goTo('pro-firstmover')"><span class="nav-icon">★</span><span class="nav-text">First Mover</span><span class="nav-badge">PRO</span></button>
+    </div>
+    <div class="sb-section">
+      <div class="nav-label">Account</div>
+      <button class="nav-item" onclick="goTo('pro')"><span class="nav-icon">✦</span><span class="nav-text">Upgrade to PRO</span></button>
+      <button class="nav-item" onclick="showSettings()"><span class="nav-icon">⚙</span><span class="nav-text">Settings</span></button>
+      <button class="nav-item" onclick="window.open('https://wa.me/2349076223484','_blank')"><span class="nav-icon">💬</span><span class="nav-text">Support</span></button>
+    </div>
+    <div class="sb-pro" onclick="goTo('pro')">
+      <div class="sb-pro-title">✦ Unlock PRO</div>
+      <div class="sb-pro-sub">Trend Momentum, Gap Finder, Weakness Report + First Mover Alert</div>
+      <div class="sb-pro-btn">Activate Now →</div>
+    </div>
+  </nav>
+
+  <!-- ════ MAIN ════ -->
+  <main class="main-content" id="main">
+
+    <!-- Page header -->
+    <div class="page-hdr">
+      <div class="page-hdr-left">
+        <div class="breadcrumb">
+          <a onclick="goTo('dashboard')">Dashboard</a>
+          <span class="sep">/</span>
+          <span>SEO Matrix</span>
+        </div>
+        <div class="page-title">SEO <span class="accent">MATRIX</span></div>
+        <div class="page-sub">Score your title across 7 precision dimensions. Get a grade, a checklist, actionable fixes, and PRO competitor comparison — all in one run.</div>
+      </div>
+    </div>
+
+    <!-- ── INPUT SECTION ──────────────────── -->
+    <div class="input-card">
+      <div class="field-label">Video Title <span style="color:var(--red);margin-left:2px;">*</span></div>
+      <input
+        type="text"
+        id="seo-title"
+        class="seo-input"
+        placeholder="Paste your full video title here…"
+        maxlength="120"
+        oninput="onTitleInput(this)"
+        onkeydown="if(event.key==='Enter')runMatrix()"
+      >
+      <div class="char-counter" id="char-counter">0 / 120 characters</div>
+
+      <div style="margin-top:14px;">
+        <div class="field-label">Description <span style="color:var(--muted);font-family:var(--font-m);font-size:0.5rem;letter-spacing:0.1em;font-style:normal;margin-left:4px;">(optional but adds +15 pts)</span></div>
+        <textarea
+          id="seo-desc"
+          class="seo-textarea"
+          placeholder="Paste your video description — hashtags, links, full text. Longer = higher score on dimension 5…"
+          oninput="onDescInput(this)"
+        ></textarea>
+        <div style="font-family:var(--font-m);font-size:0.5625rem;color:var(--dim);margin-top:4px;" id="desc-counter">0 chars · aim for 300+</div>
+      </div>
+    </div>
+
+    <div class="input-card secondary">
+      <div class="field-label">SEO Targeting <span style="color:var(--muted);font-family:var(--font-m);font-size:0.5rem;letter-spacing:0.1em;font-style:normal;margin-left:4px;">(optional but adds +20 pts)</span></div>
+      <div class="input-row">
+        <input
+          type="text"
+          id="seo-kw"
+          class="seo-input"
+          placeholder="Primary target keyword (e.g. weight loss tips, how to invest)"
+          style="flex:2;"
+        >
+        <select id="seo-niche" class="seo-select">
+          <option value="">All Niches</option>
+          <option value="finance">💰 Finance & Money</option>
+          <option value="fitness">💪 Fitness & Health</option>
+          <option value="gaming">🎮 Gaming</option>
+          <option value="tech">💻 Technology</option>
+          <option value="food">🍽 Food & Cooking</option>
+          <option value="travel">✈️ Travel</option>
+          <option value="beauty">💄 Beauty & Fashion</option>
+          <option value="education">📚 Education</option>
+          <option value="business">🚀 Business</option>
+          <option value="crime">🔍 True Crime</option>
+          <option value="motivation">🔥 Motivation</option>
+          <option value="music">🎵 Music</option>
+          <option value="sports">⚽ Sports</option>
+          <option value="relationships">❤️ Relationships</option>
+        </select>
+      </div>
+      <button class="btn-run" id="run-btn" onclick="runMatrix()">
+        <span class="run-icon">📊</span>
+        <span class="spin">↻</span>
+        RUN SEO MATRIX
+      </button>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader-wrap">
+      <div class="loader-bar-outer"><div class="loader-bar-inner"></div></div>
+      <div class="loader-msg" id="loader-msg">INITIALISING MATRIX…</div>
+    </div>
+
+    <!-- ── RESULTS ─────────────────────────── -->
+    <div id="results-wrap">
+
+      <!-- Score hero: ring + dimensions -->
+      <div class="score-hero">
+        <div class="score-ring-card" id="score-card">
+          <svg class="ring-svg" viewBox="0 0 120 120">
+            <circle class="ring-track" cx="60" cy="60" r="54"/>
+            <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="54"/>
+          </svg>
+          <div class="score-number" id="score-number">—</div>
+          <div class="score-grade" id="score-grade">—</div>
+          <div class="score-grade-desc" id="score-grade-desc"></div>
+        </div>
+
+        <div class="dims-card">
+          <div class="panel-title-row">
+            <div class="panel-title">7-Dimension Breakdown</div>
+            <div class="panel-action" onclick="copyBreakdown()">Copy</div>
+          </div>
+          <div id="dim-rows"></div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-row" id="stat-row" style="margin-bottom:16px;"></div>
+
+      <!-- Checklist + Radar -->
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title">SEO Checklist</div>
+            <div class="panel-action" onclick="copyChecklist()">Copy all</div>
+          </div>
+          <div class="panel-body" style="padding:12px 14px;">
+            <div id="checklist"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-title" data-tip="Each axis = one SEO dimension. Outer ring = perfect score.">Radar Chart</div>
+          </div>
+          <div class="panel-body">
+            <div class="chart-wrap radar-wrap"><canvas id="radar-chart"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fix list -->
+      <div class="panel" id="fix-panel">
+        <div class="panel-head">
+          <div class="panel-title">Priority Fixes — What To Change Right Now</div>
+          <span id="fix-count" style="font-family:var(--font-m);font-size:0.5625rem;color:var(--dim);"></span>
+        </div>
+        <div class="panel-body">
+          <div id="fix-list"></div>
+        </div>
+      </div>
+
+      <!-- Optimised title suggestions -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Optimised Title Suggestions — Click to Copy</div>
+          <div class="panel-action" onclick="copyAllTitles()">Copy all</div>
+        </div>
+        <div class="panel-body">
+          <div id="opt-titles"></div>
+        </div>
+      </div>
+
+      <!-- PRO: Competitor comparison (hidden by default) -->
+      <div class="panel" id="comp-panel" style="display:none;">
+        <div class="panel-head">
+          <div class="panel-title">Competitor Title Comparison</div>
+          <span style="font-family:var(--font-m);font-size:0.5rem;letter-spacing:0.1em;padding:2px 8px;border-radius:4px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);color:var(--amber);">PRO</span>
+        </div>
+        <div class="panel-body" style="padding:4px 18px;">
+          <div id="comp-rows"></div>
+        </div>
+      </div>
+
+      <!-- PRO gate (shown when not pro) -->
+      <div class="pro-gate" id="pro-gate">
+        <div class="pro-gate-inner">
+          <div class="pro-gate-icon">📈</div>
+          <div class="pro-gate-title">COMPETITOR COMPARISON</div>
+          <div class="pro-gate-sub">See exactly how your title stacks up against the top-ranking videos for your keyword. Know if you're winning or losing before you publish.</div>
+          <div class="pro-gate-features">
+            <span class="pro-gate-feat">Head-to-head scoring</span>
+            <span class="pro-gate-feat">Win/loss indicator</span>
+            <span class="pro-gate-feat">Real YouTube data</span>
+            <span class="pro-gate-feat">Instant analysis</span>
+          </div>
+          <button class="hdr-btn hdr-btn-pro" style="margin:0 auto;display:flex;padding:11px 28px;font-size:0.6875rem;" onclick="goTo('pro')">Unlock PRO — ₦3,000/mo →</button>
+        </div>
+      </div>
+
+      <!-- PRO upsell strip -->
+      <div class="pro-strip" onclick="goTo('pro')" id="pro-strip">
+        <div class="pro-strip-left">
+          <div class="pro-strip-icon">📈</div>
+          <div>
+            <div class="pro-strip-title">Is your keyword RISING or FALLING? — Trend Momentum</div>
+            <div class="pro-strip-sub">Know the trajectory before you hit publish · PRO feature · ₦3,000/mo</div>
+          </div>
+        </div>
+        <button class="hdr-btn hdr-btn-pro" style="padding:9px 18px;font-size:0.5625rem;flex-shrink:0;">Unlock PRO →</button>
+      </div>
+
+    </div><!-- /results-wrap -->
+
+    <!-- Bottom nav (mobile) -->
+    <div id="bottom-nav">
+      <div class="bn-inner">
+        <button class="bn-item" onclick="goTo('dashboard')"><span class="bn-icon">⊞</span>Home</button>
+        <button class="bn-item" onclick="goTo('viral-velocity')"><span class="bn-icon">⚡</span>Velocity</button>
+        <button class="bn-item active"><span class="bn-icon">📊</span>SEO</button>
+        <button class="bn-item" onclick="goTo('live-feed')"><span class="bn-icon">📡</span>Live</button>
+        <button class="bn-item" onclick="goTo('pro')"><span class="bn-icon">✦</span>PRO</button>
+      </div>
+    </div>
+
+  </main>
+</div><!-- /app-wrap -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// NEXUS v2 — SEO Matrix Page
+// ═══════════════════════════════════════════════════════════
+
+const YT_KEY = 'AIzaSyAQN1-kmCk5unltbHdSMEfx5H6No0rLGiM';
+const WA     = '2349076223484';
+
+let charts           = {};
+let isPro            = false;
+let sidebarCollapsed = false;
+let lastResult       = null; // stores full result for copy functions
+
+// ── POWER WORDS (all niches) ──────────────────────────────
+const POWER_WORDS = {
+  finance:       ['passive income','wealth','financial freedom','invest','returns','profits','money','savings','budget','debt-free'],
+  fitness:       ['transformation','results','lose weight','muscle','shredded','diet','workout','gains','burn fat','lean'],
+  gaming:        ['overpowered','best build','ranked','meta','tips','glitch','secret','speedrun','gameplay','pro'],
+  tech:          ['review','best','vs','setup','tutorial','comparison','worth it','specs','features','performance'],
+  food:          ['recipe','easy','delicious','5 minutes','healthy','homemade','quick','perfect','restaurant style','secret'],
+  travel:        ['hidden','budget','luxury','solo','must visit','itinerary','tips','affordable','cheap','paradise'],
+  beauty:        ['transformation','routine','tutorial','affordable','glow','skincare','makeup','products','hack','tips'],
+  education:     ['explained','simplified','understand','learn','study','guide','everything you need','basics','advanced','master'],
+  business:      ['strategy','income','system','scale','passive','online','success','blueprint','hack','profitable'],
+  crime:         ['untold','shocking','evidence','real story','caught','confession','truth','investigation','unsolved','exposed'],
+  motivation:    ['mindset','success','habits','discipline','change','overcome','powerful','transform','unstoppable','winning'],
+  music:         ['reaction','cover','breakdown','new','official','acoustic','live','tutorial','freestyle','behind the scenes'],
+  sports:        ['highlights','analysis','breakdown','best moments','reaction','prediction','training','skills','pro tips','secrets'],
+  relationships: ['signs','red flags','how to','attract','psychology','dating tips','communication','boundaries','toxic','love'],
+  default:       ['shocking','revealed','truth','exposed','secret','proven','ultimate','complete','best ever','never seen']
+};
+
+// Emotional trigger words
+const EMOTIONS = ['shocking','disturbing','chilling','unbelievable','heartbreaking','terrifying','incredible','insane','powerful','life-changing','eye-opening','jaw-dropping','must-watch','mind-blowing','devastating','explosive','viral','epic'];
+
+// Dimension max scores and descriptions
+const DIM_META = {
+  '1. Structure':   { max:20, tip:'Title length (40–65 chars), word count (6–11), structural punctuation like : or |' },
+  '2. Power Words': { max:18, tip:'Niche-specific high-CTR words. More = higher click-through rate.' },
+  '3. Emotion':     { max:12, tip:'Emotional trigger words and question marks that create curiosity.' },
+  '4. Keyword':     { max:20, tip:'Target keyword placement. Starting the title with it scores highest.' },
+  '5. Description': { max:15, tip:'Description length, hashtags, and keyword density.' },
+  '6. Specificity': { max:8,  tip:'Numbers, percentages, and time-bound specifics (+15% CTR on average).' },
+  '7. Niche Fit':   { max:7,  tip:'How well niche-specific power words appear in title and description.' }
+};
+
+// ── INIT ─────────────────────────────────────────────────
+(function init() {
+  const email = localStorage.getItem('nexus_email');
+  if (!email) { window.location.href = 'nexus-register.html'; return; }
+
+  // PRO check
+  const stored = localStorage.getItem('_nexus_pro');
+  if (stored) {
+    const [k, did, ym] = stored.split('|');
+    const now = new Date();
+    const curYm = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0');
+    if (did === getDeviceId() && ym === curYm) {
+      isPro = true;
+      document.getElementById('tier-btn').textContent = '★ PRO';
+      document.getElementById('tier-btn').className = 'hdr-btn hdr-btn-pro';
+      document.getElementById('pro-strip').style.display = 'none';
+      document.getElementById('pro-gate').style.display  = 'none';
+    }
+  }
+
+  // Prefill from sessionStorage (cross-page navigation)
+  const prefill = sessionStorage.getItem('nexus_prefill_seo');
+  if (prefill) {
+    sessionStorage.removeItem('nexus_prefill_seo');
+    document.getElementById('seo-title').value = prefill;
+    document.getElementById('seo-title').classList.add('has-value');
+    onTitleInput(document.getElementById('seo-title'));
+    setTimeout(runMatrix, 300);
+  }
+
+  updateOnline();
+  setInterval(updateOnline, 10000);
+  try { gtag('event', 'page_view', { page: 'seo-matrix' }); } catch(e) {}
+})();
+
+// ── UTILS ─────────────────────────────────────────────────
+function getDeviceId() {
+  let did = localStorage.getItem('_nexus_did');
+  if (!did) { did = 'DEV-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 8).toUpperCase(); localStorage.setItem('_nexus_did', did); }
+  return did;
+}
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = color === 'red' ? 'rgba(255,68,85,0.5)' : color === 'amber' ? 'rgba(245,166,35,0.5)' : 'rgba(0,255,136,0.5)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function updateOnline() { document.getElementById('online-count').textContent = Math.floor(180 + Math.random() * 140); }
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+async function ytFetch(path) {
+  const r = await fetch(`https://www.googleapis.com/youtube/v3/${path}&key=${YT_KEY}`);
+  if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e?.error?.message || 'YouTube API ' + r.status); }
+  return r.json();
+}
+
+// ── LIVE INPUT FEEDBACK ───────────────────────────────────
+function onTitleInput(el) {
+  const len = el.value.length;
+  el.classList.toggle('has-value', len > 0);
+  const cc = document.getElementById('char-counter');
+  cc.textContent = `${len} / 120 characters`;
+  cc.className = 'char-counter ' + (len >= 40 && len <= 65 ? 'ok' : len > 0 && len < 40 ? 'warn' : len > 65 ? (len > 100 ? 'bad' : 'warn') : '');
+}
+function onDescInput(el) {
+  const len = el.value.length;
+  const dc = document.getElementById('desc-counter');
+  dc.style.color = len >= 300 ? 'var(--g1)' : len >= 150 ? 'var(--amber)' : 'var(--dim)';
+  dc.textContent = `${len} chars · ${len >= 300 ? '✓ great' : len >= 150 ? 'add more' : 'aim for 300+'}`;
+}
+
+// ── LOADER STEPS ──────────────────────────────────────────
+const LOADER_MSGS = [
+  'CHECKING TITLE STRUCTURE…',
+  'SCANNING POWER WORDS…',
+  'MEASURING EMOTIONAL TRIGGERS…',
+  'VALIDATING KEYWORD PLACEMENT…',
+  'ANALYSING DESCRIPTION…',
+  'SCORING SPECIFICITY…',
+  'COMPUTING NICHE FIT…',
+  'BUILDING YOUR GRADE…'
+];
+let loaderStep = 0, loaderTimer = null;
+function startLoader() {
+  loaderStep = 0;
+  document.getElementById('loader-msg').textContent = LOADER_MSGS[0];
+  loaderTimer = setInterval(() => {
+    loaderStep = Math.min(loaderStep + 1, LOADER_MSGS.length - 1);
+    document.getElementById('loader-msg').textContent = LOADER_MSGS[loaderStep];
+  }, 260);
+}
+function stopLoader() { clearInterval(loaderTimer); }
+
+// ── THE SCORING ENGINE (7 dimensions) ────────────────────
+function scoreTitle(title, desc, kw, niche) {
+  const safeNiche = (niche && POWER_WORDS[niche]) ? niche : 'default';
+  const powerW  = POWER_WORDS[safeNiche];
+  const dims    = {};
+  let   total   = 0;
+
+  // D1 — Structure (20 pts)
+  let d1 = 0;
+  const tl = title.length, tw = title.trim().split(/\s+/).length;
+  if      (tl >= 40 && tl <= 65) d1 += 10;
+  else if (tl >= 30 && tl <= 70) d1 += 7;
+  else if (tl >= 20 && tl <= 80) d1 += 3;
+  if      (tw >= 6  && tw <= 11) d1 += 6;
+  else if (tw >= 5  && tw <= 12) d1 += 4;
+  if (title.includes(':'))  d1 += 2;
+  if (title.includes('|'))  d1 += 2;
+  dims['1. Structure'] = Math.min(20, d1);
+  total += dims['1. Structure'];
+
+  // D2 — Power Words (18 pts)
+  const found = powerW.filter(w => title.toLowerCase().includes(w));
+  dims['2. Power Words'] = Math.min(18, found.length * 7 + (found.length > 2 ? 4 : 0));
+  total += dims['2. Power Words'];
+
+  // D3 — Emotional Trigger (12 pts)
+  const emo = EMOTIONS.filter(e => title.toLowerCase().includes(e));
+  dims['3. Emotion'] = Math.min(12, emo.length * 7 + (title.includes('?') ? 3 : 0));
+  total += dims['3. Emotion'];
+
+  // D4 — Keyword (20 pts)
+  let d4 = 0;
+  if (kw) {
+    const kl    = kw.toLowerCase();
+    const kwArr = kl.split(/\s+/);
+    const tLow  = title.toLowerCase();
+    if      (tLow.startsWith(kl))                           d4 += 16;
+    else if (tLow.includes(kl))                             d4 += 12;
+    else if (kwArr.every(w => tLow.includes(w)))            d4 += 8;
+    else if (kwArr.some(w => tLow.includes(w)))             d4 += 4;
+    if (desc.toLowerCase().includes(kl))                    d4 += 4;
+  } else {
+    d4 = 8; // neutral if no keyword set
+  }
+  dims['4. Keyword'] = Math.min(20, d4);
+  total += dims['4. Keyword'];
+
+  // D5 — Description (15 pts)
+  let d5 = 0;
+  if      (desc.length >= 600) d5 += 10;
+  else if (desc.length >= 300) d5 += 7;
+  else if (desc.length >= 150) d5 += 4;
+  else if (desc.length > 0)    d5 += 1;
+  if (desc.includes('#'))                d5 += 3;
+  if (desc.trim().split(/\s+/).length >= 80) d5 += 2;
+  dims['5. Description'] = Math.min(15, d5);
+  total += dims['5. Description'];
+
+  // D6 — Specificity (8 pts)
+  let d6 = 0;
+  if (/\d/.test(title))                           d6 += 5;
+  if (/\d{4}/.test(title))                        d6 += 2;
+  if (/\d+%/.test(title) || /\d+x/i.test(title)) d6 += 1;
+  dims['6. Specificity'] = Math.min(8, d6);
+  total += dims['6. Specificity'];
+
+  // D7 — Niche Fit (7 pts)
+  const nicheW = powerW.filter(w => title.toLowerCase().includes(w) || desc.toLowerCase().includes(w));
+  dims['7. Niche Fit'] = Math.min(7, nicheW.length * 3);
+  total += dims['7. Niche Fit'];
+
+  return { dims, total, found, emo, tl, tw, kw, niche, powerW };
+}
+
+function getGrade(total) {
+  if (total >= 90) return { g: 'S+', desc: 'Elite — Top 1%. Algorithm will love this title.',        col: 'var(--g1)' };
+  if (total >= 80) return { g: 'A+', desc: 'Excellent — Strong SEO. Minor tweaks to reach elite.',   col: 'var(--g1)' };
+  if (total >= 70) return { g: 'A',  desc: 'Great — Above average. A few improvements needed.',      col: '#7CFF88'   };
+  if (total >= 60) return { g: 'B+', desc: 'Good — Solid but several gaps to close.',                col: 'var(--blue)' };
+  if (total >= 50) return { g: 'B',  desc: 'Average — Will rank but won\'t dominate.',               col: 'var(--blue)' };
+  if (total >= 40) return { g: 'C',  desc: 'Below average — Significant SEO gaps. Follow fixes.',    col: 'var(--amber)' };
+  return                  { g: 'D',  desc: 'Poor — Needs major rework. Start with title structure.', col: 'var(--red)' };
+}
+
+// ── MAIN RUN ─────────────────────────────────────────────
+async function runMatrix() {
+  const title = document.getElementById('seo-title').value.trim();
+  const desc  = document.getElementById('seo-desc').value.trim();
+  const kw    = document.getElementById('seo-kw').value.trim().toLowerCase();
+  const niche = document.getElementById('seo-niche').value || 'default';
+
+  if (!title) {
+    showToast('Enter a title first', 'red');
+    document.getElementById('seo-title').focus();
+    return;
+  }
+
+  // UI state
+  const btn = document.getElementById('run-btn');
+  btn.classList.add('loading');
+  document.getElementById('loader-wrap').classList.add('active');
+  document.getElementById('results-wrap').classList.remove('active');
+  startLoader();
+
+  // Small delay so loader steps animate
+  await new Promise(r => setTimeout(r, 2200));
+
+  try {
+    const result = scoreTitle(title, desc, kw, niche);
+    lastResult   = { ...result, title, desc };
+    const grade  = getGrade(result.total);
+
+    renderScoreRing(result.total, grade);
+    renderDimensions(result.dims);
+    renderStats(result, grade);
+    renderChecklist(result);
+    renderRadar(result.dims, grade.col);
+    renderFixes(result);
+    renderOptimisedTitles(title, result);
+    if (isPro) renderCompetitors(kw || title.split(' ').slice(0, 3).join(' '), result);
+
+    // Log event
+    try {
+      const email  = localStorage.getItem('nexus_email') || '';
+      const events = JSON.parse(localStorage.getItem('nexus_events') || '[]');
+      events.push({ gmail: email, event_type: 'seo_matrix_run', score: result.total, grade: grade.g, title_len: title.length, timestamp: new Date().toISOString() });
+      if (events.length > 200) events.splice(0, events.length - 200);
+      localStorage.setItem('nexus_events', JSON.stringify(events));
+      gtag('event', 'seo_matrix_run', { score: result.total, grade: grade.g });
+    } catch(e) {}
+
+    document.getElementById('results-wrap').classList.add('active');
+    window.scrollTo({ top: document.getElementById('results-wrap').offsetTop - 72, behavior: 'smooth' });
+
+  } catch(err) {
+    showToast('⚠ ' + (err.message || 'Analysis error'), 'red');
+  } finally {
+    stopLoader();
+    document.getElementById('loader-wrap').classList.remove('active');
+    btn.classList.remove('loading');
+  }
+}
+
+// ── RENDER: SCORE RING ────────────────────────────────────
+function renderScoreRing(total, grade) {
+  const card   = document.getElementById('score-card');
+  const fill   = document.getElementById('ring-fill');
+  const numEl  = document.getElementById('score-number');
+  const grEl   = document.getElementById('score-grade');
+  const descEl = document.getElementById('score-grade-desc');
+
+  // Animate number
+  numEl.textContent = '0';
+  numEl.style.color = grade.col;
+  grEl.style.color  = grade.col;
+  grEl.textContent  = `GRADE ${grade.g}`;
+  descEl.textContent = grade.desc;
+  card.style.setProperty('--score-col', grade.col);
+  fill.style.stroke = grade.col;
+
+  // Animate ring: dashoffset = circumference * (1 - pct)
+  const circ = 2 * Math.PI * 54; // 339.292
+  fill.style.strokeDashoffset = circ.toString();
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      fill.style.strokeDashoffset = (circ * (1 - total / 100)).toFixed(3);
+    }, 60);
+  });
+
+  // Count-up animation
+  let cur = 0;
+  const step = Math.ceil(total / 28);
+  const timer = setInterval(() => {
+    cur = Math.min(cur + step, total);
+    numEl.textContent = cur;
+    if (cur >= total) clearInterval(timer);
+  }, 45);
+
+  // Glow on high score
+  if (total >= 80) {
+    card.style.boxShadow = `0 0 40px ${grade.col}22, 0 0 0 1px ${grade.col}33`;
+    setTimeout(() => { card.style.boxShadow = ''; }, 2000);
+  }
+}
+
+// ── RENDER: DIMENSIONS ────────────────────────────────────
+function renderDimensions(dims) {
+  document.getElementById('dim-rows').innerHTML = Object.entries(dims).map(([k, v]) => {
+    const meta = DIM_META[k];
+    const pct  = Math.round((v / meta.max) * 100);
+    const col  = pct >= 80 ? 'var(--g1)' : pct >= 55 ? 'var(--blue)' : pct >= 30 ? 'var(--amber)' : 'var(--red)';
+    const shortKey = k.split('. ')[1];
+    return `<div class="dim-row">
+      <div class="dim-label" data-tip="${meta.tip}">
+        ${shortKey} <span class="tip-icon">?</span>
+      </div>
+      <div class="dim-track">
+        <div class="dim-fill" style="width:0%;background:${col};" data-width="${pct}%"></div>
+      </div>
+      <div class="dim-score" style="color:${col};">${v}/${meta.max}</div>
+    </div>`;
+  }).join('');
+
+  // Animate bars
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      document.querySelectorAll('.dim-fill[data-width]').forEach(el => {
+        el.style.width = el.getAttribute('data-width');
+      });
+    }, 80);
+  });
+}
+
+// ── RENDER: STATS ROW ─────────────────────────────────────
+function renderStats(result, grade) {
+  const { dims, total, found, tl, tw } = result;
+  document.getElementById('stat-row').innerHTML = `
+    <div class="stat-box" style="--accent:${grade.col}">
+      <div class="stat-lbl">Matrix Score</div>
+      <div class="stat-val">${total}</div>
+      <div class="stat-meta">out of 100</div>
+    </div>
+    <div class="stat-box" style="--accent:var(--blue)">
+      <div class="stat-lbl">Title Length</div>
+      <div class="stat-val">${tl}</div>
+      <div class="stat-meta">${tl >= 40 && tl <= 65 ? '✓ Optimal' : tl < 40 ? '↑ Too short' : '↓ Too long'}</div>
+    </div>
+    <div class="stat-box" style="--accent:${found.length ? 'var(--g1)' : 'var(--red)'}">
+      <div class="stat-lbl">Power Words</div>
+      <div class="stat-val">${found.length}</div>
+      <div class="stat-meta">${found.length ? found.slice(0,2).join(', ') : 'none found'}</div>
+    </div>
+    <div class="stat-box" style="--accent:var(--purple)">
+      <div class="stat-lbl">Word Count</div>
+      <div class="stat-val">${tw}</div>
+      <div class="stat-meta">${tw >= 6 && tw <= 11 ? '✓ Good range' : tw < 6 ? 'Add words' : 'Trim title'}</div>
+    </div>`;
+}
+
+// ── RENDER: CHECKLIST ─────────────────────────────────────
+function renderChecklist(result) {
+  const { title, desc, kw, tl, tw } = result;
+  const found = Array.isArray(result.found) ? result.found : [];
+  const emo   = Array.isArray(result.emo)   ? result.emo   : [];
+  const checks = [
+    { pass: tl >= 40 && tl <= 65,        warn: tl >= 30 && tl < 40, text: `Title length: ${tl} chars ${tl >= 40 && tl <= 65 ? '✓ Optimal (40–65)' : tl >= 30 ? '⚠ Aim for 40–65 chars' : '✗ Too short or too long'}` },
+    { pass: tw >= 6 && tw <= 11,          warn: tw >= 5,             text: `Word count: ${tw} words ${tw >= 6 && tw <= 11 ? '✓ Good (6–11)' : tw >= 5 ? '⚠ Slightly off' : '✗ Add more descriptive words'}` },
+    { pass: title.includes(':') || title.includes('|'), warn: false, text: title.includes(':') || title.includes('|') ? '✓ Structural punctuation used (: or |)' : '✗ Missing colon or pipe — add structure' },
+    { pass: found.length > 0,             warn: false,               text: `Power words: ${found.length > 0 ? '✓ ' + found.slice(0, 3).join(', ') : '✗ None detected — add at least one'}` },
+    { pass: /\d/.test(title),             warn: false,               text: /\d/.test(title) ? '✓ Number in title (+15% CTR average)' : '✗ No number — add one (e.g. 5 Ways, 30 Days, 10x)' },
+    { pass: emo.length > 0,               warn: false,               text: emo.length > 0 ? `✓ Emotional trigger: "${emo[0]}"` : '✗ No emotional trigger word found' },
+    { pass: title.includes('?'),          warn: false,               text: title.includes('?') ? '✓ Question mark creates curiosity' : '✗ Consider ending with a question (optional but powerful)' },
+    { pass: !kw || title.toLowerCase().includes(kw), warn: kw && title.toLowerCase().split(' ').some(w => kw.includes(w)), text: !kw ? '⚠ No keyword set — add one above for +20 pts' : title.toLowerCase().includes(kw) ? `✓ Keyword "${kw}" in title` : `✗ Keyword "${kw}" missing from title` },
+    { pass: desc.length >= 300,           warn: desc.length >= 100, text: `Description: ${desc.length} chars ${desc.length >= 300 ? '✓ Good length' : desc.length > 0 ? '⚠ Add more — aim for 300+' : '✗ No description (costs 15 pts)'}` },
+    { pass: desc.includes('#'),           warn: false,               text: desc.includes('#') ? '✓ Hashtags present in description' : '✗ Add 3–5 hashtags (e.g. #YourNiche)' },
+  ];
+  document.getElementById('checklist').innerHTML = checks.map(c => {
+    const cls = c.pass ? 'pass' : c.warn ? 'warn' : 'fail';
+    const icon = c.pass ? '✓' : c.warn ? '⚠' : '✗';
+    return `<div class="check-item ${cls}"><span class="check-icon">${icon}</span><span>${c.text}</span></div>`;
+  }).join('');
+}
+
+// ── RENDER: RADAR CHART ───────────────────────────────────
+function renderRadar(dims, col) {
+  if (charts.radar) charts.radar.destroy();
+  const labels = Object.keys(dims).map(k => k.split('. ')[1]);
+  const vals   = Object.entries(dims).map(([k, v]) => Math.round((v / DIM_META[k].max) * 100));
+  const ctx    = document.getElementById('radar-chart').getContext('2d');
+  charts.radar = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels,
+      datasets: [{
+        data: vals,
+        backgroundColor: col.replace(')', ',0.08)').replace('var(', 'rgba(').replace('--g1', '0,255,136').replace('--blue', '79,142,247').replace('--amber', '245,166,35').replace('--red', '255,68,85').replace('rgba(','rgba(') || 'rgba(0,255,136,0.08)',
+        borderColor: col,
+        pointBackgroundColor: col,
+        pointBorderColor: 'transparent',
+        pointRadius: 4,
+        borderWidth: 1.5,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { display: false, stepSize: 25 },
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          angleLines: { color: 'rgba(255,255,255,0.04)' },
+          pointLabels: { color: '#505050', font: { family: 'JetBrains Mono', size: 9 } }
+        }
+      }
+    }
+  });
+}
+
+function renderFixes(result) {
+  const { title, desc, kw, tl, tw } = result;
+  const found  = Array.isArray(result.found)  ? result.found  : [];
+  const emo    = Array.isArray(result.emo)    ? result.emo    : [];
+  const powerW = Array.isArray(result.powerW) ? result.powerW : POWER_WORDS.default;
+  const fixes = [];
+
+  if (tl < 40 || tl > 65)
+    fixes.push({ impact: 'high', title: 'Fix title length', desc: `Your title is ${tl} chars. ${tl < 40 ? 'It\'s too short — add more descriptive words.' : 'It\'s too long — trim to 65 chars.'} Optimal range is 40–65.` });
+
+  if (found.length === 0)
+    fixes.push({ impact: 'high', title: 'Add a power word', desc: `No power words detected. Add one of these immediately: ${powerW.slice(0, 5).join(', ')}. These words dramatically improve CTR.` });
+
+  if (kw && !title.toLowerCase().includes(kw))
+    fixes.push({ impact: 'high', title: `Put keyword at the start`, desc: `Your keyword "${kw}" is not in your title. Start your title with it for maximum ranking power. Example: "${kw.charAt(0).toUpperCase() + kw.slice(1)}: [rest of your title]"` });
+
+  if (!/\d/.test(title))
+    fixes.push({ impact: 'med', title: 'Add a number to your title', desc: 'Titles with numbers get 15% more clicks on average. Examples: "5 Ways to…", "In 30 Days", "10x Your…", "₦1M in…"' });
+
+  if (!title.includes(':') && !title.includes('|'))
+    fixes.push({ impact: 'med', title: 'Add structural punctuation', desc: 'Use a colon (:) or pipe (|) to create visual structure. Example: "5 Investing Mistakes: What Nobody Tells You"' });
+
+  if (emo.length === 0)
+    fixes.push({ impact: 'med', title: 'Add an emotional trigger word', desc: `Add one of these: shocking, incredible, mind-blowing, life-changing, jaw-dropping. They create curiosity and boost click-through rates.` });
+
+  if (desc.length < 300)
+    fixes.push({ impact: desc.length === 0 ? 'high' : 'med', title: `Expand description (${desc.length}/300 chars)`, desc: `Your description is too short. Write at least 300 characters. Include your keyword 2–3 times, add timestamps, links, and call-to-action.` });
+
+  if (!desc.includes('#'))
+    fixes.push({ impact: 'low', title: 'Add hashtags to description', desc: 'Add 3–5 relevant hashtags at the end of your description. Example: #YourNiche #TopicName #YouTubeCreator' });
+
+  if (!kw)
+    fixes.push({ impact: 'med', title: 'Set a target keyword', desc: 'You haven\'t set a keyword. Enter your primary search term above and re-run the matrix — this adds up to 20 points.' });
+
+  const impactOrder = { high: 0, med: 1, low: 2 };
+  fixes.sort((a, b) => impactOrder[a.impact] - impactOrder[b.impact]);
+
+  document.getElementById('fix-count').textContent = `${fixes.length} issue${fixes.length !== 1 ? 's' : ''} found`;
+
+  if (!fixes.length) {
+    document.getElementById('fix-list').innerHTML = '<div class="check-item pass"><span class="check-icon">★</span><span>No critical issues. Your title is well-optimised — consider minor tweaks and run again.</span></div>';
+    return;
+  }
+
+  document.getElementById('fix-list').innerHTML = fixes.map((f, i) => `
+    <div class="fix-item">
+      <div class="fix-number">${String(i + 1).padStart(2, '0')}</div>
+      <div class="fix-body">
+        <div class="fix-title">${f.title}</div>
+        <div class="fix-desc">${f.desc}</div>
+      </div>
+      <span class="fix-impact ${f.impact}">${f.impact === 'high' ? 'HIGH' : f.impact === 'med' ? 'MED' : 'LOW'}</span>
+    </div>`).join('');
+}
+
+// ── RENDER: OPTIMISED TITLES ──────────────────────────────
+function renderOptimisedTitles(originalTitle, result) {
+  const { kw, powerW, found, tl } = result;
+  const pw1 = powerW[0] || 'proven';
+  const pw2 = powerW[1] || 'ultimate';
+  const pw3 = powerW[2] || 'secret';
+  const core = kw || originalTitle.split(' ').slice(0, 4).join(' ');
+  const num  = /\d/.test(originalTitle) ? '' : '5 ';
+
+  const templates = [
+    // Keyword-first structure
+    kw ? `${kw.charAt(0).toUpperCase() + kw.slice(1)}: The ${pw1.charAt(0).toUpperCase() + pw1.slice(1)} Truth Nobody Is Telling You`
+       : `The ${pw1.charAt(0).toUpperCase() + pw1.slice(1)} Truth About ${originalTitle.split(':')[0].trim()}: What Nobody Tells You`,
+    // Number + power word
+    `${num}${pw2.charAt(0).toUpperCase() + pw2.slice(1)} ${core.charAt(0).toUpperCase() + core.slice(1)} Strategies That Actually Work`,
+    // Question hook
+    `Why ${core.charAt(0).toUpperCase() + core.slice(1)} Is Failing You | The ${pw3.charAt(0).toUpperCase() + pw3.slice(1)} Method Revealed`,
+    // Personal proof
+    `I Used This ${pw1.charAt(0).toUpperCase() + pw1.slice(1)} ${core} Technique for 30 Days — Here's What Happened`,
+  ];
+
+  // Score each suggestion
+  const scored = templates.map(t => {
+    const res = scoreTitle(t, result.desc || '', result.kw || '', result.niche || 'default');
+    return { title: t, score: res.total };
+  }).sort((a, b) => b.score - a.score);
+
+  document.getElementById('opt-titles').innerHTML = scored.map((s, i) => `
+    <div class="opt-title-card" onclick="copyTitle('${escHtml(s.title)}')">
+      <div class="opt-title-text">${escHtml(s.title)}</div>
+      <div class="opt-title-meta">
+        <span class="score">Score: ${s.score}/100</span>
+        <span>${s.title.length} chars</span>
+        <span>Click to copy</span>
+      </div>
+    </div>`).join('');
+}
+
+function copyTitle(title) {
+  navigator.clipboard.writeText(title).then(() => showToast('✓ Title copied to clipboard'));
+}
+
+// ── RENDER: COMPETITOR (PRO) ──────────────────────────────
+async function renderCompetitors(q, myResult) {
+  document.getElementById('comp-panel').style.display = 'block';
+  document.getElementById('comp-rows').innerHTML = '<div style="font-family:var(--font-m);font-size:0.5625rem;color:var(--dim);padding:12px 0;">Loading competitor data…</div>';
+  try {
+    const data  = await ytFetch(`search?part=snippet&q=${encodeURIComponent(q)}&type=video&maxResults=6&order=viewCount`);
+    const items = data.items || [];
+    if (!items.length) { document.getElementById('comp-rows').innerHTML = '<div style="color:var(--muted);font-size:0.875rem;padding:12px 0;">No competitor data found.</div>'; return; }
+
+    document.getElementById('comp-rows').innerHTML = items.map((v, i) => {
+      const t    = v.snippet.title;
+      const niche = document.getElementById('seo-niche').value || 'default';
+      const safeN = (niche && POWER_WORDS[niche]) ? niche : 'default';
+      const cs   = scoreTitle(t, '', '', safeN).total;
+      const win  = myResult.total > cs;
+      const diff = myResult.total - cs;
+      const col  = win ? 'var(--g1)' : 'var(--red)';
+      const th   = v.snippet.thumbnails?.medium?.url || '';
+      return `<div class="comp-row" onclick="navigator.clipboard.writeText('${escHtml(t)}');showToast('✓ Competitor title copied')">
+        <div class="comp-rank" style="color:${i < 3 ? 'var(--amber)' : 'var(--dim)'};">${i + 1}</div>
+        <div class="comp-thumb">${th ? `<img src="${th}" loading="lazy" alt="">` : '▶'}</div>
+        <div class="comp-body">
+          <div class="comp-title">${escHtml(t)}</div>
+          <div class="comp-meta">${escHtml(v.snippet.channelTitle)}</div>
+        </div>
+        <div class="comp-score-wrap">
+          <div class="comp-score" style="color:${col};">${cs}</div>
+          <div class="comp-win" style="color:${col};">${win ? `▲ +${diff}` : `▼ ${diff}`}</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('comp-rows').innerHTML = `<div style="color:var(--muted);font-size:0.875rem;padding:12px 0;">Could not load: ${e.message}</div>`;
+  }
+}
+
+// ── COPY HELPERS ──────────────────────────────────────────
+function copyBreakdown() {
+  if (!lastResult) return;
+  const lines = Object.entries(lastResult.dims).map(([k, v]) => `${k}: ${v}/${DIM_META[k].max}`);
+  lines.unshift(`Total: ${lastResult.total}/100`);
+  navigator.clipboard.writeText(lines.join('\n')).then(() => showToast('✓ Breakdown copied'));
+}
+function copyChecklist() {
+  const items = document.querySelectorAll('.check-item');
+  const text  = Array.from(items).map(el => el.querySelector('span:last-child').textContent).join('\n');
+  navigator.clipboard.writeText(text).then(() => showToast('✓ Checklist copied'));
+}
+function copyAllTitles() {
+  const items = document.querySelectorAll('.opt-title-text');
+  const text  = Array.from(items).map((el, i) => `${i + 1}. ${el.textContent}`).join('\n');
+  navigator.clipboard.writeText(text).then(() => showToast('✓ All titles copied'));
+}
+
+// ── NAVIGATION ────────────────────────────────────────────
+function goTo(page) {
+  const map = {
+    'dashboard':      'nexus-dashboard.html',
+    'viral-velocity': 'nexus-viral-velocity.html',
+    'title-dna':      'nexus-title-dna.html',
+    'niche-map':      'nexus-niche-map.html',
+    'seo-matrix':     'nexus-seo-matrix.html',
+    'live-feed':      'nexus-live-feed.html',
+    'pro':            'nexus-pro.html',
+    'pro-momentum':   'nexus-pro.html',
+    'pro-gap':        'nexus-pro.html',
+    'pro-weak':       'nexus-pro.html',
+    'pro-firstmover': 'nexus-pro.html',
+    'terms':          'nexus-terms.html',
+    'privacy':        'nexus-privacy.html',
+    'admin':          'nexus-admin.html',
+  };
+  try {
+    const email  = localStorage.getItem('nexus_email') || '';
+    const events = JSON.parse(localStorage.getItem('nexus_events') || '[]');
+    events.push({ gmail: email, event_type: 'navigate', to: page, timestamp: new Date().toISOString() });
+    if (events.length > 200) events.splice(0, events.length - 200);
+    localStorage.setItem('nexus_events', JSON.stringify(events));
+    gtag('event', 'page_navigate', { to: page });
+  } catch(e) {}
+  const dest = map[page];
+  if (dest) window.location.href = dest;
+  else showToast('Page coming soon — building now');
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────
+function toggleSidebar() {
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.toggle('mobile-open');
+    document.getElementById('sb-overlay').style.display =
+      document.getElementById('sidebar').classList.contains('mobile-open') ? 'block' : 'none';
+  } else {
+    sidebarCollapsed = !sidebarCollapsed;
+    document.getElementById('sidebar').classList.toggle('collapsed', sidebarCollapsed);
+    document.getElementById('main').classList.toggle('collapsed', sidebarCollapsed);
+  }
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sb-overlay').style.display = 'none';
+}
+
+// ── THEME ─────────────────────────────────────────────────
+let dark = true;
+function toggleTheme() {
+  dark = !dark;
+  document.body.style.background = dark ? 'var(--off)' : '#F5F5F5';
+  document.body.style.color = dark ? 'var(--white)' : '#111';
+  document.getElementById('theme-btn').textContent = dark ? '🌙' : '☀️';
+}
+
+// ── SETTINGS ──────────────────────────────────────────────
+function showSettings() { showToast(`Device: ${getDeviceId().slice(0, 18)}… · ${isPro ? 'PRO Active' : 'Free Plan'}`); }
+
+// ── CMD PALETTE ───────────────────────────────────────────
+const CMD = [
+  {ico:'⊞',name:'Dashboard',       sub:'Main hub',                      go:'dashboard'},
+  {ico:'⚡',name:'Viral Velocity',  sub:'Score keywords 0–100',          go:'viral-velocity'},
+  {ico:'🧬',name:'Title DNA',       sub:'Extract power words + titles',  go:'title-dna'},
+  {ico:'🗺',name:'Niche Map',       sub:'Saturation analysis',           go:'niche-map'},
+  {ico:'📊',name:'SEO Matrix',      sub:'7-dimension title scoring',     go:'seo-matrix'},
+  {ico:'📡',name:'Live Feed',       sub:'Real-time YouTube trending',    go:'live-feed'},
+  {ico:'✦', name:'Upgrade PRO',     sub:'₦3,000/month — 4 extra tools', go:'pro'},
+  {ico:'📈',name:'Trend Momentum',  sub:'PRO — Rising or falling?',      go:'pro'},
+  {ico:'🔍',name:'Gap Finder',      sub:'PRO — Uncovered topics',        go:'pro'},
+  {ico:'⚔', name:'Weakness Report', sub:'PRO — Attack vectors',          go:'pro'},
+  {ico:'★', name:'First Mover',     sub:'PRO — Zero competition',        go:'pro'},
+];
+let cmdFilt = CMD, cmdSel = 0;
+function openCmd() { document.getElementById('cmd-overlay').classList.add('open'); document.getElementById('cmd-input').value = ''; cmdFilt = CMD; cmdSel = 0; renderCmd(); setTimeout(() => document.getElementById('cmd-input').focus(), 50); }
+function closeCmd() { document.getElementById('cmd-overlay').classList.remove('open'); }
+function filterCmd(v) { cmdFilt = CMD.filter(c => c.name.toLowerCase().includes(v.toLowerCase()) || c.sub.toLowerCase().includes(v.toLowerCase())); cmdSel = 0; renderCmd(); }
+function renderCmd() {
+  document.getElementById('cmd-list').innerHTML = cmdFilt.map((c, i) => `
+    <div class="cmd-item${i === cmdSel ? ' hi' : ''}" onclick="goTo('${c.go}');closeCmd()">
+      <div class="cmd-ico">${c.ico}</div>
+      <div><div class="cmd-name">${c.name}</div><div class="cmd-sub">${c.sub}</div></div>
+    </div>`).join('');
+}
+function cmdNav(e) {
+  if (e.key === 'ArrowDown') { cmdSel = Math.min(cmdSel + 1, cmdFilt.length - 1); renderCmd(); }
+  else if (e.key === 'ArrowUp') { cmdSel = Math.max(cmdSel - 1, 0); renderCmd(); }
+  else if (e.key === 'Enter' && cmdFilt[cmdSel]) { goTo(cmdFilt[cmdSel].go); closeCmd(); }
+  else if (e.key === 'Escape') closeCmd();
+}
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openCmd(); }
+  if (e.key === 'Escape') closeCmd();
+});
+renderCmd();
+</script>
+</body>
+</html>
