@@ -828,6 +828,11 @@ button { font-family: var(--font-b); cursor: pointer; border: none; background: 
 </nav>
 
 <script>
+(function() {
+  if (!localStorage.getItem('nexus_email')) {
+    window.location.href = 'index.html';
+  }
+})();
 'use strict';
 
 // ── STATE ─────────────────────────────────────────────────
