@@ -1038,8 +1038,7 @@ async function submitSignup() {
     // In the full app, this would navigate to /dashboard
     // For standalone page, we just show the success state
     showToast(`Welcome to NEXUS v2, ${email.split('@')[0]}! 🎉`);
-    // Uncomment to redirect: window.location.href = '/dashboard';
-  }, 1200);
+  window.location.href = 'nexus-dashboard.html';
 }
 
 /* ─── SIGNIN SUBMIT ──────────────────────── */
@@ -1075,8 +1074,7 @@ function submitSignin() {
     btn.classList.remove('loading');
     document.getElementById('si-success').style.display = 'block';
     showToast(`Welcome back, ${email.split('@')[0]}! 👋`);
-    // Uncomment to redirect: window.location.href = '/dashboard';
-  }, 1000);
+    window.location.href = 'nexus-dashboard.html';
 }
 
 /* ─── DEVICE ID ──────────────────────────── */
